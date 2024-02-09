@@ -12,4 +12,4 @@ const pool = mysql.createPool({
     database: config_db.database,
 }).promise();
 
-module.exports = pool;
+module.exports =  pool;

@@ -1,4 +1,5 @@
 const pool = require('../db');
+const mysql = require("mysql2");
 class Model {
     constructor(tableName) {
         this.tableName = tableName;
