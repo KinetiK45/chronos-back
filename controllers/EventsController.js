@@ -72,7 +72,9 @@ setInterval(async () => {
         console.log("event" , upcomingEvents)
         upcomingEvents.forEach(event => {
             let eventDate = new Date(event.startAt);
-            if (eventDate <= currentTime && eventDate.getTime() >= currentTime.getTime() - 90000) {
+            const timeDifference = currentTime - eventDate;
+            console.log(`time diff = ${timeDifference}`)
+            if (timeDifference <= 60_000) {
                 sendNotification(event.user_email, event.title);
                 console.log("notification sent");
             } else {
