@@ -74,7 +74,7 @@ setInterval(async () => {
             let eventDate = new Date(event.startAt);
             const timeDifference = currentTime - eventDate;
             console.log(`time diff = ${timeDifference}`)
-            if (timeDifference <= 60_000) {
+            if (timeDifference > 0 && timeDifference <= 60_000) {
                 sendNotification(event.user_email, event.title);
                 console.log("notification sent");
             } else {
