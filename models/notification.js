@@ -16,7 +16,8 @@ class Notification extends Model{
         const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category', 'u.email as user_email'];
 
         const whereClauses = [
-            'e.startAt > NOW()'
+            'e.startAt > NOW()',
+            'DATE(e.startAt) = CURDATE()'
         ];
 
         const query = `

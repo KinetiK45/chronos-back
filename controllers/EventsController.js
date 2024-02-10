@@ -16,18 +16,37 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+async function getAllByMonth(req, res) {
+    try {
+        let events = new EventUsers();
+        const period = req.query.period || 'month';
+        await verifyToken(req, res, async () => {
+            const eventsMonth = await events.getByPeriod(req.senderData.id ,period);
+            if (eventsMonth && eventsMonth.length > 0) {
+                res.json(new Response(true, "All events by" + period, { events: eventsMonth }));
+            } else {
+                res.json(new Response(true, "No events for the current" + period, { events: [] }));
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(new Response(false, "Internal server error"));
+    }
+}
+
+
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    const { title, startAt, endAt, allDay, category } = req.body;
+    const { title, startAt, endAt, allDay, category,isNotification } = req.body;
     let eventUser = new EventUsers();
     verifyToken(req, res, async () => {
-        const userId = req.senderData.id;
-        const user_email = req.senderData.email;
         try {
             const result = await events.create(title, startAt, endAt, allDay, category);
-            await eventUser.add(userId, result);
-            await notification.add(user_email,result);
+            await eventUser.add(req.senderData.id, result);
+            if(isNotification === true){
+                await notification.add(req.senderData.email, result);
+            }
             res.json(new Response(true, 'Event create'));
         } catch (error) {
             console.log(error);
@@ -37,11 +56,10 @@ async function createEvents(req, res) {
 }
 async function setNotification(req,res) {
     let notification = new Notification();
-    const {user_email,event_id} = req.body;
+    const {event_id} = req.body;
     verifyToken(req, res, async () => {
-        const user_email = req.senderData.email;
         try {
-            await notification.add(user_email,event_id);
+            await notification.add(req.senderData.email,event_id);
             res.json(new Response(true, 'Notification create'));
         } catch (error) {
             console.log(error);
@@ -69,12 +87,10 @@ setInterval(async () => {
         let notification = new Notification();
         let currentTime = new Date();
         const upcomingEvents = await notification.getUpcomingEvents();
-        console.log("event" , upcomingEvents)
         upcomingEvents.forEach(event => {
             let eventDate = new Date(event.startAt);
             const timeDifference = currentTime - eventDate;
-            console.log(`time diff = ${timeDifference}`)
-            if (timeDifference > 0 && timeDifference <= 60_000) {
+            if (timeDifference > -60000 && timeDifference <= 0) {
                 sendNotification(event.user_email, event.title);
                 console.log("notification sent");
             } else {
@@ -103,5 +119,6 @@ async function addUserToEvents(req,res){
 module.exports = {
     createEvents,
     addUserToEvents,
-    setNotification
+    setNotification,
+    getAllByMonth
 }
