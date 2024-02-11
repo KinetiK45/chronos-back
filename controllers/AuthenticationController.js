@@ -3,6 +3,7 @@ const Response = require('../models/response');
 const token_controller = require('../controllers/TokenController');
 const nodemailer = require("nodemailer");
 const ERRORS = require('./Errors');
+const Calendar = require('../models/calendars');
 
 
 const transporter = nodemailer.createTransport({
@@ -23,6 +24,8 @@ async function register(req, res) {
                 .then(()=>{
                     res.json(new Response(true, 'Регистрация успешна'));
                 })
+            let calendar = new Calendar();
+            calendar.create("Calendar",result);
         }).catch((error)=>{
         console.log(error);
         res.json(new Response(false, error.toString()));

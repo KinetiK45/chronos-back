@@ -4,8 +4,11 @@ const Events = require("../models/events");
 const EventUsers = require("../models/event_users");
 const {verifyToken} = require("./TokenController");
 const nodemailer = require("nodemailer");
-const {getUpcomingEvents} = require("../db");
 const Notification = require('../models/notification');
+const axios = require('axios');
+const moment = require('moment');
+const Calendar = require('../models/calendars')
+
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -20,11 +23,16 @@ async function getAllByMonth(req, res) {
     try {
         let events = new EventUsers();
         const period = req.query.period || 'month';
+        const {calendar_id} = req.body
         await verifyToken(req, res, async () => {
-            const eventsMonth = await events.getByPeriod(req.senderData.id ,period);
-            if (eventsMonth && eventsMonth.length > 0) {
+            const eventsMonth = await events.getByPeriod(req.senderData.id ,period,calendar_id);
+            if (eventsMonth && eventsMonth.length > 0 && calendar_id === await events.getDefaultCalendar(req.senderData.id)) {
+                const holidays = await getNationalHolidays('LT',period);
+                res.json(new Response(true, "All events by" + period, { events: eventsMonth,holidays }));
+            }else if(eventsMonth && eventsMonth.length > 0){
                 res.json(new Response(true, "All events by" + period, { events: eventsMonth }));
-            } else {
+            }
+            else {
                 res.json(new Response(true, "No events for the current" + period, { events: [] }));
             }
         });
@@ -33,17 +41,50 @@ async function getAllByMonth(req, res) {
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
+/**
+на фронте используй для получения геолокации
+navigator.geolocation.getCurrentPosition((position) => {
+const countryCode = position.coords.countryCode;
+});
+ */
+async function getNationalHolidays(countryCode, period) {
+    try {
+        const year = new Date().getFullYear();
+        const response = await axios.get(`https://date.nager.at/api/v2/publicholidays/${year}/${countryCode}`);
+        const holidays = response.data;
+        let startOfWeek, endOfWeek;
 
+        switch (period) {
+            case 'day':
+                startOfWeek = moment().toISOString();
+                endOfWeek = moment().toISOString();
+                break;
+            case 'week':
+                startOfWeek = moment().startOf('isoWeek').toISOString();
+                endOfWeek = moment().endOf('isoWeek').toISOString();
+                break;
+            case 'month':
+                startOfWeek = moment().startOf('month').toISOString();
+                endOfWeek = moment().endOf('month').toISOString();
+                break;
+        }
+
+        return  holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to fetch national holidays');
+    }
+}
 
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    const { title, startAt, endAt, allDay, category,isNotification } = req.body;
+    const { title, startAt, endAt, allDay, category, isNotification, calendars_id} = req.body;
     let eventUser = new EventUsers();
     verifyToken(req, res, async () => {
         try {
             const result = await events.create(title, startAt, endAt, allDay, category);
-            await eventUser.add(req.senderData.id, result);
+            await eventUser.create(req.senderData.id, result, calendars_id);
             if(isNotification === true){
                 await notification.add(req.senderData.email, result);
             }
@@ -103,8 +144,8 @@ setInterval(async () => {
 },  60 * 1000);
 async function addUserToEvents(req,res){
     let eventUser = new EventUsers();
-    const {event_id,user_id } =  req.body;
-    eventUser.add(user_id,event_id)
+    const {event_id,user_id,calendar_id } =  req.body;
+    eventUser.create(user_id,event_id,calendar_id)
             .then((result) => {
                 eventUser.find({ id: result })
                     .then(() => {
@@ -116,9 +157,11 @@ async function addUserToEvents(req,res){
         });
 }
 
+
+
 module.exports = {
     createEvents,
     addUserToEvents,
     setNotification,
-    getAllByMonth
+    getAllByMonth,
 }
