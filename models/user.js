@@ -2,9 +2,9 @@ const Model = require("./model");
 
 class User extends Model {
     constructor() {
-        super("user");
+        super("users");
     }
-    registration(username, password, email, full_name, racist = true, race = "istribitel mig-28 v sovershenstve", is_vlaDICK = true, supporting_feminism = false, religion, role_id = 1){
+    registration(username, password, email, full_name, racist = true, race = "istribitel mig-28 v sovershenstve", is_vlaDICK = true, supporting_feminism = false, religion = 'Atheist', role_id = 2){
         this.username = username;
         this.password = password;
         this.email = email;

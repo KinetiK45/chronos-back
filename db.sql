@@ -12,7 +12,7 @@ create table if not exists roles
     role varchar(50) not null
 );
 
-create table if not exists user
+create table if not exists users
 (
     id                  int          not null primary key AUTO_INCREMENT,
     username            varchar(45)  not null unique,
@@ -43,7 +43,7 @@ create table if not exists calendars
     id    int         not null primary key auto_increment,
     title varchar(70) not null,
     user_id int not null ,
-    foreign key (user_id) references user(id) on delete cascade
+    foreign key (user_id) references users(id) on delete cascade
 );
 create table if not exists event_users
 (
@@ -51,16 +51,20 @@ create table if not exists event_users
     user_id     int not null,
     event_id    int not null,
     calendar_id int not null,
-    foreign key (user_id) references user (id) on delete cascade,
+    foreign key (user_id) references users (id) on delete cascade,
     foreign key (event_id) references events (id) on delete cascade,
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
 
-create table if not exists notification
+create table if not exists notifications
 (
     id         int          not null primary key auto_increment,
     user_email varchar(256) not null,
     event_id   int          not null,
-    foreign key (user_email) references user (email) on delete cascade,
+    foreign key (user_email) references users (email) on delete cascade,
     foreign key (event_id) references events (id) on delete cascade
 );
+
+INSERT INTO roles (role) VALUES
+('Admin'),
+('User');

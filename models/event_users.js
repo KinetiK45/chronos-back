@@ -62,7 +62,7 @@ class Event_users extends Model{
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         JOIN event_users eu ON e.id = eu.event_id  
-        JOIN user u ON eu.user_id = u.id
+        JOIN users u ON eu.user_id = u.id
         WHERE ${whereClauses.join(' AND ')}
         LIMIT 30;
     `;
