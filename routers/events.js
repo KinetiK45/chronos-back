@@ -3,7 +3,8 @@ const router = new Router;
 const eventController = require("../controllers/EventsController")
 
 router.post('/new_events',eventController.createEvents);
-router.post('/add_user',eventController.addUserToEvents);
 router.post('/set_notification',eventController.setNotification);
 router.get('/all',eventController.getAllByMonth);
+router.post("/invite",eventController.addUserToEventsByEmail);
+router.post('/accept-invitation',eventController.getAcception);
 module.exports = router

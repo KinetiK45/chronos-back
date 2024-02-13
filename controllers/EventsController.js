@@ -2,13 +2,15 @@ const Response = require("../models/response");
 const ERRORS = require("./Errors");
 const Events = require("../models/events");
 const EventUsers = require("../models/event_users");
-const {verifyToken} = require("./TokenController");
+const {verifyToken, generateToken} = require("./TokenController");
 const nodemailer = require("nodemailer");
 const Notification = require('../models/notification');
 const axios = require('axios');
 const moment = require('moment');
 const Calendar = require('../models/calendars')
-
+const e = require("express");
+const User = require("../models/user");
+const {verify} = require("jsonwebtoken");
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -23,7 +25,7 @@ async function getAllByMonth(req, res) {
     try {
         let events = new EventUsers();
         const period = req.query.period || 'month';
-        const {calendar_id} = req.body
+        const {calendar_id,countryCode} = req.body
         await verifyToken(req, res, async () => {
             const eventsMonth = await events.getByPeriod(req.senderData.id ,period,calendar_id);
             if (eventsMonth && eventsMonth.length > 0 && calendar_id === await events.getDefaultCalendar(req.senderData.id)) {
@@ -41,6 +43,7 @@ async function getAllByMonth(req, res) {
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
+
 /**
 на фронте используй для получения геолокации
 navigator.geolocation.getCurrentPosition((position) => {
@@ -68,7 +71,6 @@ async function getNationalHolidays(countryCode, period) {
                 endOfWeek = moment().endOf('month').toISOString();
                 break;
         }
-
         return  holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
     } catch (error) {
         console.error(error);
@@ -79,12 +81,11 @@ async function getNationalHolidays(countryCode, period) {
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    const { title, startAt, endAt, allDay, category, isNotification, calendars_id} = req.body;
+    const { title, startAt, endAt, allDay, category, isNotification,description,color, calendar_id} = req.body;
     let eventUser = new EventUsers();
     verifyToken(req, res, async () => {
         try {
-            const result = await events.create(title, startAt, endAt, allDay, category);
-            await eventUser.create(req.senderData.id, result, calendars_id);
+            const result = await events.create(title, startAt, endAt, allDay, category,color,description,calendar_id);
             if(isNotification === true){
                 await notification.add(req.senderData.email, result);
             }
@@ -95,6 +96,7 @@ async function createEvents(req, res) {
         }
     });
 }
+
 async function setNotification(req,res) {
     let notification = new Notification();
     const {event_id} = req.body;
@@ -108,6 +110,7 @@ async function setNotification(req,res) {
         }
     });
 }
+
 function sendNotification(userEmail, eventTitle) {
     const mailOptions = {
         to: userEmail,
@@ -123,6 +126,7 @@ function sendNotification(userEmail, eventTitle) {
         }
     });
 }
+
 setInterval(async () => {
     try {
         let notification = new Notification();
@@ -142,10 +146,13 @@ setInterval(async () => {
         console.error(error);
     }
 },  60 * 1000);
-async function addUserToEvents(req,res){
-    let eventUser = new EventUsers();
-    const {event_id,user_id,calendar_id } =  req.body;
-    eventUser.create(user_id,event_id,calendar_id)
+
+async function getAcception(req,res){
+    try {
+        const decodedToken = verify(req.query.token, 'secret key');
+        console.log(decodedToken);
+        let eventUser = new EventUsers();
+        eventUser.create(decodedToken.user_id,decodedToken.calendar_id)
             .then((result) => {
                 eventUser.find({ id: result })
                     .then(() => {
@@ -155,13 +162,46 @@ async function addUserToEvents(req,res){
             console.log(error);
             res.json(new Response(false, error.toString()));
         });
+    } catch (error) {
+        console.error(error);
+        res.json(new Response(false, error.toString()));
+    }
 }
-
-
+async function addUserToEventsByEmail(req, res) {
+    let eventUser = new EventUsers();
+    let user = new User();
+    const { user_id, calendar_id } = req.body;
+    verifyToken(req, res, async () => {
+        user.find({id: user_id}).then(async (result) => {
+            if (result.length === 0) {
+                res.json(new Response(false, 'Not found user'));
+            } else if (calendar_id === await eventUser.getDefaultCalendar(req.senderData.id)) {
+                res.json(new Response(false, 'You cannot share the default calendar'));
+            } else {
+                const invitationCode = generateToken({user_id, calendar_id}, '36h');
+                const title = await eventUser.getCalendarTitle(req.senderData.id, calendar_id);
+                const mailOptions = {
+                    to: result[0].email,
+                    subject: 'Invite',
+                    text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation?token=${invitationCode}`
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        console.log('Email sent: ', info);
+                    }
+                });
+                res.json(new Response(true, "Send invitation", {invitationCode}));
+            }
+        });
+    });
+}
 
 module.exports = {
     createEvents,
-    addUserToEvents,
     setNotification,
     getAllByMonth,
+    addUserToEventsByEmail,
+    getAcception
 }

@@ -3,7 +3,7 @@ const Model = require("./model");
 
 class Notification extends Model{
     constructor() {
-        super("notification");
+        super("notifications");
     }
     add(user_email,event_id){
         this.user_email = user_email;
@@ -23,9 +23,8 @@ class Notification extends Model{
         const query = `
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
-        JOIN event_users eu ON e.id = eu.event_id
-        JOIN user u ON eu.user_id = u.id
-        JOIN notification n ON e.id = n.event_id
+        JOIN notifications n ON e.id = n.event_id
+        JOIN users u ON n.user_email = u.email
         WHERE ${whereClauses.join(' AND ')}
         ORDER BY e.startAt
         LIMIT 10;

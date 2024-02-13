@@ -10,5 +10,4 @@ router.use('/api/auth', authentication);
 router.use('/api/events' , events);
 router.use('/api/calendar', calendar);
 
-
 module.exports = router;
