@@ -25,7 +25,7 @@ async function register(req, res) {
                     res.json(new Response(true, 'Регистрация успешна'));
                 })
             let calendar = new Calendar();
-            calendar.create("Calendar",result);
+            calendar.create("Default", result);
         }).catch((error)=>{
         console.log(error);
         res.json(new Response(false, error.toString()));
@@ -40,9 +40,11 @@ async function login(req, res) {
             res.json(new Response(false, 'Нет пользователя с такими данными'));
         }
         else if (usersFound[0].password === password){
+            const token = token_controller.generateToken(usersFound[0]);
+            res.setHeader('Set-Cookie', `access_token=${token}; HttpOnly; Path=/`);
             res.json(new Response(true, 'Успешный вход', {
                 user_id: usersFound[0].id,
-                auth_key: token_controller.generateToken(usersFound[0]),
+                auth_key: token,
                 role: usersFound[0].role
             }));
         }

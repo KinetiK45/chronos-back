@@ -36,13 +36,18 @@ create table if not exists events
     startAt  datetime     not null,
     endAt    datetime     not null,
     allDay   boolean      not null,
-    category enum ('arrangement','reminder','task')
+    calendar_id int not null,
+    description varchar(256),
+    color VARCHAR(7), -- цвет в формате HEX
+    category enum ('arrangement','reminder','task'),
+    foreign key (calendar_id) references calendars (id) on delete cascade
 );
 create table if not exists calendars
 (
     id    int         not null primary key auto_increment,
     title varchar(70) not null,
-    user_id int not null ,
+    user_id int not null,
+    description varchar(256),
     foreign key (user_id) references users(id) on delete cascade
 );
 create table if not exists event_users
@@ -50,10 +55,8 @@ create table if not exists event_users
     id          int not null primary key auto_increment,
     user_id     int not null,
     event_id    int not null,
-    calendar_id int not null,
     foreign key (user_id) references users (id) on delete cascade,
-    foreign key (event_id) references events (id) on delete cascade,
-    foreign key (calendar_id) references calendars (id) on delete cascade
+    foreign key (event_id) references events (id) on delete cascade
 );
 
 create table if not exists notifications
