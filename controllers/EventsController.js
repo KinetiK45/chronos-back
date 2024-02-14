@@ -1,5 +1,4 @@
 const Response = require("../models/response");
-const ERRORS = require("./Errors");
 const Events = require("../models/events");
 const EventUsers = require("../models/event_users");
 const {verifyToken, generateToken} = require("./TokenController");

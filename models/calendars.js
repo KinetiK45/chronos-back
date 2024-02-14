@@ -36,15 +36,12 @@ class Calendars extends Model {
         const tableName = 'calendars';
 
         const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description'];
-        const  whereClauses = [
-            'eu.user_id = ?'
-        ];
+
         const query = `
             SELECT ${selectColumns.join(',')} 
             FROM ${tableName} e        
             JOIN event_users eu ON e.user_id = eu.user_id 
             JOIN users u ON eu.user_id = u.id
---             WHERE ${whereClauses}
             LIMIT 10;
         `;
         try {
