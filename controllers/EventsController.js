@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 async function getAllByMonth(req, res) {
     try {
         let events = new EventUsers();
-        const period = req.query.period || 'month';
+        const period = req.params.period || 'month';
         const {calendar_id,countryCode} = req.body
         await verifyToken(req, res, async () => {
             const eventsMonth = await events.getByPeriod(req.senderData.id ,period,calendar_id);
@@ -148,7 +148,7 @@ setInterval(async () => {
 
 async function getAcception(req,res){
     try {
-        const decodedToken = verify(req.query.token, 'secret key');
+        const decodedToken = verify(req.params.token, 'secret key');
         console.log(decodedToken);
         let eventUser = new EventUsers();
         eventUser.create(decodedToken.user_id,decodedToken.calendar_id)
@@ -182,7 +182,7 @@ async function addUserToEventsByEmail(req, res) {
                 const mailOptions = {
                     to: result[0].email,
                     subject: 'Invite',
-                    text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation?token=${invitationCode}`
+                    text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {

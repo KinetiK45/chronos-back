@@ -18,10 +18,24 @@ async function createCalendar(req,res){
     });
 }
 
+async function getCalendarById(req,res) {
+    try {
+        const calendar_id = req.params.id;
+        console.log(calendar_id);
+        let calendar = new Calendar();
+        const calendars = await calendar.find({id: calendar_id});
+        res.json(new Response(true, "calendar", {calendar: calendars}));
+    }catch (error) {
+        console.log(error);
+        res.json(new Response(false, error.toString()));
+    }
+}
+
 async function getAllCalendars(req,res) {
     try {
         await verifyToken(req, res, async () => {
             let calendars = new Calendar();
+            console.log(req.senderData.id);
             const allCalendars = await calendars.getCalendars(req.senderData.id);
             res.json(new Response(true, "all calendars", {calendar: allCalendars}));
         });
@@ -73,5 +87,6 @@ module.exports = {
     createCalendar,
     deleteCalendar,
     updateCalendar,
-    getAllCalendars
+    getAllCalendars,
+    getCalendarById
 }

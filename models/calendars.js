@@ -17,7 +17,7 @@ class Calendars extends Model {
         const query = `
         SELECT id
         FROM ${tableName}
-        WHERE user_id = ? AND title = 'Calendar'
+        WHERE user_id = ? AND title = 'Default'
         LIMIT 1;
     `;
         try {
@@ -31,21 +31,20 @@ class Calendars extends Model {
             throw error;
         }
     }
-
     async getCalendars(user_id) {
         const tableName = 'calendars';
 
         const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description'];
 
         const query = `
-            SELECT ${selectColumns.join(',')} 
-            FROM ${tableName} e        
-            JOIN event_users eu ON e.user_id = eu.user_id 
-            JOIN users u ON eu.user_id = u.id
-            LIMIT 10;
-        `;
+        SELECT ${selectColumns.join(',')} 
+        FROM ${tableName} e
+        LEFT JOIN event_users eu ON e.id = eu.calendar_id
+        WHERE eu.user_id = ? OR e.user_id = ?
+        LIMIT 10;
+    `;
         try {
-            const [rows] = await pool.execute(query,[user_id]);
+            const [rows] = await pool.execute(query, [user_id, user_id]);
             console.log(rows);
             return rows;
         } catch (error) {

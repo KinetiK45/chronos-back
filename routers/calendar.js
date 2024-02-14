@@ -6,4 +6,5 @@ router.post('/create',calendar.createCalendar);
 router.delete('/delete',calendar.deleteCalendar);
 router.patch('/update',calendar.updateCalendar);
 router.get('/all',calendar.getAllCalendars);
+router.get('/:id',calendar.getCalendarById);
 module.exports = router
