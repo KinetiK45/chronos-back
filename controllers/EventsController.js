@@ -24,16 +24,20 @@ async function getAllByMonth(req, res) {
     try {
         let events = new EventUsers();
         const period = req.params.period || 'month';
-        const {calendar_id, countryCode} = req.body
+        const {calendar_id, countryCode} = req.query;
+
+        let respData = {};
+        if (countryCode && Number.parseInt(calendar_id) === await events.getDefaultCalendar(req.senderData.id)){
+            respData.events = [];
+            respData.holidays = await getNationalHolidays(countryCode, period);
+        }
 
         const eventsMonth = await events.getByPeriod(period, calendar_id);
-        if (eventsMonth && eventsMonth.length > 0 && calendar_id === await events.getDefaultCalendar(req.senderData.id)) {
-            const holidays = await getNationalHolidays('LT', period);
-            res.json(new Response(true, "All events by" + period, {events: eventsMonth, holidays}));
-        } else if (eventsMonth && eventsMonth.length > 0) {
-            res.json(new Response(true, "All events by" + period, {events: eventsMonth}));
+        if (eventsMonth && eventsMonth.length > 0) {
+            respData.events = eventsMonth;
+            res.json(new Response(true, "All events by" + period, respData));
         } else {
-            res.json(new Response(true, "No events for the current" + period, {events: []}));
+            res.json(new Response(true, "No events for the current" + period, respData));
         }
     } catch (error) {
         console.error(error);
@@ -48,6 +52,7 @@ const countryCode = position.coords.countryCode;
 });
  */
 async function getNationalHolidays(countryCode, period) {
+    console.log(`ищу праздники для ${countryCode}`);
     try {
         const year = new Date().getFullYear();
         const response = await axios.get(`https://date.nager.at/api/v2/publicholidays/${year}/${countryCode}`);
@@ -68,11 +73,11 @@ async function getNationalHolidays(countryCode, period) {
                 endOfWeek = moment().endOf('month').toISOString();
                 break;
         }
-        return  holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
+        return holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
     } catch (error) {
         console.error(error);
-        throw new Error('Failed to fetch national holidays');
     }
+    return [];
 }
 
 async function createEvents(req, res) {

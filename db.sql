@@ -72,11 +72,3 @@ create table if not exists notifications
 INSERT INTO roles (role) VALUES
 ('Admin'),
 ('User');
-
-#  SELECT e.id,e.title,e.user_id,e.description
-#         FROM calendars e
-#         LEFT JOIN event_users eu ON e.id = eu.calendar_id
-#         WHERE eu.user_id = ? OR e.user_id = ?
-#         LIMIT 10;
-
-
