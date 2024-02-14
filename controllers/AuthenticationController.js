@@ -41,10 +41,10 @@ async function login(req, res) {
         }
         else if (usersFound[0].password === password){
             const token = token_controller.generateToken(usersFound[0]);
-            res.setHeader('Set-Cookie', `access_token=${token}; HttpOnly; Path=/`);
             res.json(new Response(true, 'Успешный вход', {
                 user_id: usersFound[0].id,
-                role: usersFound[0].role
+                role: usersFound[0].role,
+                auth_key: token
             }));
         }
         else

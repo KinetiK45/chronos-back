@@ -39,11 +39,13 @@ class Calendars extends Model {
         const query = `
         SELECT ${selectColumns.join(',')} 
         FROM ${tableName} e
-        LEFT JOIN event_users eu ON e.id = eu.calendar_id
+        LEFT JOIN calendar_users eu ON e.id = eu.calendar_id
         WHERE eu.user_id = ? OR e.user_id = ?
         LIMIT 10;
     `;
         try {
+            console.log(query);
+            console.log([user_id, user_id]);
             const [rows] = await pool.execute(query, [user_id, user_id]);
             console.log(rows);
             return rows;
