@@ -29,6 +29,15 @@ create table if not exists users
     FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
 );
 
+create table if not exists calendars
+(
+    id    int         not null primary key auto_increment,
+    title varchar(70) not null,
+    user_id int not null,
+    description varchar(256),
+    foreign key (user_id) references users(id) on delete cascade
+);
+
 create table if not exists events
 (
     id       int          not null primary key auto_increment,
@@ -41,14 +50,6 @@ create table if not exists events
     color VARCHAR(7), -- цвет в формате HEX
     category enum ('arrangement','reminder','task'),
     foreign key (calendar_id) references calendars (id) on delete cascade
-);
-create table if not exists calendars
-(
-    id    int         not null primary key auto_increment,
-    title varchar(70) not null,
-    user_id int not null,
-    description varchar(256),
-    foreign key (user_id) references users(id) on delete cascade
 );
 create table if not exists event_users
 (

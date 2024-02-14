@@ -44,7 +44,6 @@ async function login(req, res) {
             res.setHeader('Set-Cookie', `access_token=${token}; HttpOnly; Path=/`);
             res.json(new Response(true, 'Успешный вход', {
                 user_id: usersFound[0].id,
-                auth_key: token,
                 role: usersFound[0].role
             }));
         }
