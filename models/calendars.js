@@ -1,9 +1,11 @@
 const Model = require("./model");
 const pool = require("../db");
 class Calendars extends Model {
+
     constructor() {
         super("calendars");
     }
+
     create(title,user_id,description= null){
         this.title = title;
         this.user_id = user_id;
@@ -45,7 +47,6 @@ class Calendars extends Model {
     `;
         try {
             console.log(query);
-            console.log([user_id, user_id]);
             const [rows] = await pool.execute(query, [user_id, user_id]);
             console.log(rows);
             return rows;

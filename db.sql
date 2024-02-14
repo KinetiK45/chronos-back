@@ -47,7 +47,7 @@ create table if not exists events
     allDay   boolean      not null,
     calendar_id int not null,
     description varchar(256),
-    color VARCHAR(7), -- цвет в формате HEX
+    color VARCHAR(7),
     category enum ('arrangement','reminder','task'),
     foreign key (calendar_id) references calendars (id) on delete cascade
 );

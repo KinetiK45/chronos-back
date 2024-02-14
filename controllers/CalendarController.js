@@ -37,7 +37,7 @@ async function getAllCalendars(req,res) {
             let calendars = new Calendar();
             console.log(req.senderData.id);
             const allCalendars = await calendars.getCalendars(req.senderData.id);
-            res.json(new Response(true, "all calendars", {calendar: allCalendars}));
+            res.json(new Response(true, "all calendars",  allCalendars));
         });
     }catch (error) {
         console.log(error);

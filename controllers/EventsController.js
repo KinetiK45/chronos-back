@@ -24,19 +24,17 @@ async function getAllByMonth(req, res) {
     try {
         let events = new EventUsers();
         const period = req.params.period || 'month';
-        const {calendar_id,countryCode} = req.body
-        await verifyToken(req, res, async () => {
-            const eventsMonth = await events.getByPeriod(req.senderData.id ,period,calendar_id);
-            if (eventsMonth && eventsMonth.length > 0 && calendar_id === await events.getDefaultCalendar(req.senderData.id)) {
-                const holidays = await getNationalHolidays('LT',period);
-                res.json(new Response(true, "All events by" + period, { events: eventsMonth,holidays }));
-            }else if(eventsMonth && eventsMonth.length > 0){
-                res.json(new Response(true, "All events by" + period, { events: eventsMonth }));
-            }
-            else {
-                res.json(new Response(true, "No events for the current" + period, { events: [] }));
-            }
-        });
+        const {calendar_id, countryCode} = req.body
+
+        const eventsMonth = await events.getByPeriod(period, calendar_id);
+        if (eventsMonth && eventsMonth.length > 0 && calendar_id === await events.getDefaultCalendar(req.senderData.id)) {
+            const holidays = await getNationalHolidays('LT', period);
+            res.json(new Response(true, "All events by" + period, {events: eventsMonth, holidays}));
+        } else if (eventsMonth && eventsMonth.length > 0) {
+            res.json(new Response(true, "All events by" + period, {events: eventsMonth}));
+        } else {
+            res.json(new Response(true, "No events for the current" + period, {events: []}));
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));

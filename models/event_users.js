@@ -3,7 +3,7 @@ const pool = require("../db");
 
 class Event_users extends Model{
     constructor() {
-        super("event_users");
+        super("calendar_users");
     }
 
     async create(user_id, calendar_id) {
@@ -57,14 +57,13 @@ class Event_users extends Model{
         }
     }
 
-    async getByPeriod(user_id,period,calendar_id) {
+    async getByPeriod(period,calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay','e.calendar_id','e.description','e.color', 'e.category'];
 
         const whereClauses = [
-            'eu.user_id = ?',
-            'eu.calendar_id = ?'
+            'e.calendar_id = ?'
         ];
 
         switch (period) {
@@ -82,14 +81,13 @@ class Event_users extends Model{
         const query = `
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
-        JOIN event_users eu ON e.id = eu.event_id  
-        JOIN users u ON eu.user_id = u.id
         WHERE ${whereClauses.join(' AND ')}
         LIMIT 30;
     `;
 
         try {
-            const [rows] = await pool.execute(query,[user_id,calendar_id]);
+            const [rows] = await pool.execute(query,[calendar_id]);
+            console.log(rows)
             return rows;
         } catch (error) {
             throw error;
