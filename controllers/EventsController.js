@@ -10,6 +10,7 @@ const Calendar = require('../models/calendars')
 const e = require("express");
 const User = require("../models/user");
 const {verify} = require("jsonwebtoken");
+const Chat = require('../models/chat');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -44,15 +45,7 @@ async function getAllByMonth(req, res) {
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
-
-/**
-на фронте используй для получения геолокации
-navigator.geolocation.getCurrentPosition((position) => {
-const countryCode = position.coords.countryCode;
-});
- */
 async function getNationalHolidays(countryCode, period) {
-    console.log(`ищу праздники для ${countryCode}`);
     try {
         const year = new Date().getFullYear();
         const response = await axios.get(`https://date.nager.at/api/v2/publicholidays/${year}/${countryCode}`);
@@ -73,11 +66,11 @@ async function getNationalHolidays(countryCode, period) {
                 endOfWeek = moment().endOf('month').toISOString();
                 break;
         }
-        return holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
+        return  holidays.filter(holiday => holiday.date >= startOfWeek && holiday.date <= endOfWeek);
     } catch (error) {
         console.error(error);
+        throw new Error('Failed to fetch national holidays');
     }
-    return [];
 }
 
 async function createEvents(req, res) {
@@ -153,6 +146,7 @@ async function getAcception(req,res){
     try {
         const decodedToken = verify(req.params.token, 'secret key');
         console.log(decodedToken);
+        let chat = new Chat();
         let eventUser = new EventUsers();
         eventUser.create(decodedToken.user_id,decodedToken.calendar_id)
             .then((result) => {
@@ -164,6 +158,7 @@ async function getAcception(req,res){
             console.log(error);
             res.json(new Response(false, error.toString()));
         });
+        await chat.creat(decodedToken.calendar_id);
     } catch (error) {
         console.error(error);
         res.json(new Response(false, error.toString()));

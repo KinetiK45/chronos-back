@@ -51,6 +51,7 @@ create table if not exists events
     category enum ('arrangement','reminder','task'),
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
+
 create table if not exists calendar_users
 (
     id          int not null primary key auto_increment,
@@ -67,6 +68,26 @@ create table if not exists notifications
     event_id   int          not null,
     foreign key (user_email) references users (email) on delete cascade,
     foreign key (event_id) references events (id) on delete cascade
+);
+
+create table if not exists chats
+(
+    id          int not null primary key auto_increment,
+    calendar_id int not null,
+    foreign key (calendar_id) references calendars (id) on delete cascade
+);
+
+CREATE TABLE IF NOT EXISTS messages
+(
+    id        INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    chat_id   INT  NOT NULL,
+    content   TEXT NOT NULL,
+    sender_id INT  NOT NULL,
+    reply_to  INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (chat_id) REFERENCES chats (id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (reply_to) REFERENCES messages (id) ON DELETE SET NULL
 );
 
 INSERT INTO roles (role) VALUES

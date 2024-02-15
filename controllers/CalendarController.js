@@ -75,7 +75,7 @@ async function updateCalendar(req,res){
                 title: title,
                 description: description
             });
-            res.json(new Response(true, 'Calendar successfully delete'));
+            res.json(new Response(true, 'Calendar successfully update'));
         }
     }catch (error){
         console.log(error);
