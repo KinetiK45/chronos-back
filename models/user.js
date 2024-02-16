@@ -17,5 +17,6 @@ class User extends Model {
         this.role_id = role_id;
         return this.insert();
     }
+
 }
 module.exports = User;

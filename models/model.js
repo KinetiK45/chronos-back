@@ -85,8 +85,6 @@ class Model {
         }
     }
 
-
-
     async delete(conditions = {}) {
         const whereClauses = [];
         const values = [];
