@@ -28,10 +28,10 @@ async function getAllByMonth(req, res) {
         const {calendar_id, countryCode} = req.query;
 
         let respData = {};
-        if (countryCode && Number.parseInt(calendar_id) === await events.getDefaultCalendar(req.senderData.id)){
-            respData.events = [];
-            respData.holidays = await getNationalHolidays(countryCode, period);
-        }
+        // if (countryCode && Number.parseInt(calendar_id) === await events.getDefaultCalendar(req.senderData.id)){
+        //     respData.events = [];
+        //     respData.holidays = await getNationalHolidays(countryCode, period);
+        // }
 
         const eventsMonth = await events.getByPeriod(period, calendar_id);
         if (eventsMonth && eventsMonth.length > 0) {
