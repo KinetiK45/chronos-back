@@ -1,20 +1,19 @@
 const Calendar = require("../models/calendars");
 const Response = require("../models/response");
-const {verifyToken} = require("./TokenController");
+const User = require("../models/user");
 
-async function createCalendar(req,res){
+async function createCalendar(req,res) {
     let calendar = new Calendar();
-    const {title,description} = req.body;
-    verifyToken(req, res, async () => {
-        calendar.create(title, req.senderData.id,description).then((result) => {
-            calendar.find({id: result})
-                .then(() => {
-                    res.json(new Response(true, 'Calendar successfully create'));
-                });
-        }).catch((error) => {
-            console.log(error);
-            res.json(new Response(false, error.toString()));
-        });
+    const {title, description} = req.body;
+
+    calendar.create(title, req.senderData.id, description).then((result) => {
+        calendar.find({id: result})
+            .then(() => {
+                res.json(new Response(true, 'Calendar successfully create'));
+            });
+    }).catch((error) => {
+        console.log(error);
+        res.json(new Response(false, error.toString()));
     });
 }
 
@@ -33,17 +32,14 @@ async function getCalendarById(req,res) {
 
 async function getAllCalendars(req,res) {
     try {
-        await verifyToken(req, res, async () => {
-            let calendars = new Calendar();
-            console.log(req.senderData.id);
-            const allCalendars = await calendars.getCalendars(req.senderData.id);
-            res.json(new Response(true, "all calendars",  allCalendars));
-        });
-    }catch (error) {
+        let calendars = new Calendar();
+        console.log(req.senderData.id);
+        const allCalendars = await calendars.getCalendars(req.senderData.id);
+        res.json(new Response(true, "all calendars", allCalendars));
+    } catch (error) {
         console.log(error);
         res.json(new Response(false, error.toString()));
     }
-
 }
 
 async function deleteCalendar(req,res) {
@@ -83,10 +79,22 @@ async function updateCalendar(req,res){
     }
 }
 
+async function getUserByCalendarId(req,res){
+    let {calendar_id } = req.params.calendar_id;
+    let user = new User();
+    const result = await user.getUserByCalendarId(calendar_id);
+    if(result != null) {
+        res.json(new Response(true, "users", result));
+    }else {
+        res.json(new Response(false, "not found"));
+    }
+}
+
 module.exports = {
     createCalendar,
     deleteCalendar,
     updateCalendar,
     getAllCalendars,
-    getCalendarById
+    getCalendarById,
+    getUserByCalendarId
 }

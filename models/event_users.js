@@ -21,7 +21,7 @@ class Event_users extends Model{
         const query = `
         SELECT id
         FROM ${tableName}
-        WHERE user_id = ? AND title = 'Default'
+        WHERE user_id = ? AND type = 'default'
         LIMIT 1;
     `;
         try {

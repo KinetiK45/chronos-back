@@ -6,10 +6,11 @@ class Calendars extends Model {
         super("calendars");
     }
 
-    create(title,user_id,description= null){
+    create(title,user_id,description= null,type = 'own'){
         this.title = title;
         this.user_id = user_id;
         this.description = description;
+        this.type = type;
         return this.insert();
     }
 
@@ -17,11 +18,11 @@ class Calendars extends Model {
         const tableName = 'calendars';
 
         const query = `
-        SELECT id
-        FROM ${tableName}
-        WHERE user_id = ? AND title = 'Default'
-        LIMIT 1;
-    `;
+            SELECT id
+            FROM ${tableName}
+            WHERE user_id = ?
+              AND type = 'default' LIMIT 1;
+        `;
         try {
             const [rows] = await pool.execute(query, [user_id]);
             if (rows.length > 0) {
@@ -33,10 +34,11 @@ class Calendars extends Model {
             throw error;
         }
     }
+
     async getCalendars(user_id) {
         const tableName = 'calendars';
 
-        const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description'];
+        const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description','e.type'];
 
         const query = `
         SELECT ${selectColumns.join(',')} 

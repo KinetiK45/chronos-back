@@ -35,6 +35,7 @@ create table if not exists calendars
     title varchar(70) not null,
     user_id int not null,
     description varchar(256),
+    type enum ('default','own','shared'),
     foreign key (user_id) references users(id) on delete cascade
 );
 
