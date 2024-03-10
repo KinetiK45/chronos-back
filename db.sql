@@ -20,13 +20,8 @@ create table if not exists users
     email               varchar(256) not null unique,
     full_name           varchar(60)  not null,
     photo               varchar(256) default 'default.png',
-    racist              boolean      default true,
     race                varchar(60)  default 'istribitel mig-28 v sovershenstve',
-    is_vlaDICK          boolean      default true,
-    supporting_feminism boolean      default false,
-    religion            enum ('Atheist','Buddhist','Catholic','Christian','Woman'),
-    role_id             int          not null,
-    FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
+    is_vlaDICK          boolean      default true
 );
 
 create table if not exists calendars
@@ -35,6 +30,7 @@ create table if not exists calendars
     title varchar(70) not null,
     user_id int not null,
     description varchar(256),
+    color VARCHAR(7),
     type enum ('default','own','shared'),
     foreign key (user_id) references users(id) on delete cascade
 );
@@ -48,7 +44,6 @@ create table if not exists events
     allDay   boolean      not null,
     calendar_id int not null,
     description varchar(256),
-    color VARCHAR(7),
     category enum ('arrangement','reminder','task'),
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
@@ -56,8 +51,11 @@ create table if not exists events
 create table if not exists calendar_users
 (
     id          int not null primary key auto_increment,
+    custom_color VARCHAR(7),
     user_id     int not null,
     calendar_id    int not null,
+    role_id             int          not null,
+    FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
     foreign key (user_id) references users (id) on delete cascade,
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
@@ -91,6 +89,14 @@ CREATE TABLE IF NOT EXISTS messages
     FOREIGN KEY (reply_to) REFERENCES messages (id) ON DELETE SET NULL
 );
 
+create table if not exists type_events(
+    id INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    events_id int not null,
+    place varchar(80),
+    complete boolean default false,
+    foreign key (events_id) references events(id) on DELETE cascade
+);
+
 INSERT INTO roles (role) VALUES
-('Admin'),
-('User');
+('editor'),
+('inspector');

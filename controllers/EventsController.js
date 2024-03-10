@@ -1,6 +1,6 @@
 const Response = require("../models/response");
 const Events = require("../models/events");
-const EventUsers = require("../models/event_users");
+const Calendar_User = require("../models/event_users");
 const {verifyToken, generateToken} = require("./TokenController");
 const nodemailer = require("nodemailer");
 const Notification = require('../models/notification');
@@ -11,6 +11,7 @@ const e = require("express");
 const User = require("../models/user");
 const {verify} = require("jsonwebtoken");
 const Chat = require('../models/chat');
+const Type_Events = require('../models/type_events');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -23,7 +24,7 @@ const transporter = nodemailer.createTransport({
 
 async function getAllByMonth(req, res) {
     try {
-        let events = new EventUsers();
+        let events = new Calendar_User();
         const period = req.params.period || 'month';
         const {calendar_id, countryCode} = req.query;
 
@@ -76,13 +77,19 @@ async function getNationalHolidays(countryCode, period) {
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    const {title, startAt, endAt, allDay, category, isNotification, description, color, calendar_id} = req.body;
-    let eventUser = new EventUsers();
+    let type = new Type_Events();
+    const {title, startAt, endAt, allDay, category, isNotification, description, calendar_id,place,complete} = req.body;
+    let eventUser = new Calendar_User();
     try {
         if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
-            const result = await events.create(title, startAt, endAt, allDay, category, color, description, calendar_id);
+            const result = await events.create(title, startAt, endAt, allDay, category,description, calendar_id);
             if (isNotification === true) {
                 await notification.add(req.senderData.email, result);
+            }
+            if (category === "arrangement"){
+               await type.create(result.id,place);
+            }else if(category === "task") {
+                await type.create(result.id,"");
             }
             res.json(new Response(true, 'Event create'));
         }
@@ -148,8 +155,9 @@ async function getAcception(req,res){
         const decodedToken = verify(req.params.token, 'secret key');
         console.log(decodedToken);
         let chat = new Chat();
-        let eventUser = new EventUsers();
+        let eventUser = new Calendar_User();
         let calendar = new Calendar();
+        // let event =
         eventUser.create(decodedToken.user_id,decodedToken.calendar_id)
             .then((result) => {
                 eventUser.find({ id: result })
@@ -172,8 +180,40 @@ async function getAcception(req,res){
         res.json(new Response(false, error.toString()));
     }
 }
-async function addUserToEventsByEmail(req, res) {
-    let eventUser = new EventUsers();
+async function addUserToEventsByEmail(req,res){
+    let user = new User();
+    let event  = new Events();
+    const {user_id,event_id} = req.body;
+    user.find({id: user_id}).then(async (result) => {
+        if (result.length === 0) {
+            res.json(new Response(false, 'Not found user'));
+        } else {
+            const invitationCode = generateToken({user_id, event_id}, '36h');
+            const title = await event.find({ id: event_id});
+            if(title != null) {
+                const mailOptions = {
+                    to: result[0].email,
+                    subject: 'Invite',
+                    text: `${req.senderData.full_name} invites you to join his event ${title.title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        console.log('Email sent: ', info);
+                    }
+                });
+                res.json(new Response(true, "Send invitation", {invitationCode}));
+            }else {
+                res.json(new Response(false, "Not found event"));
+
+            }
+        }
+    });
+}
+
+async function addUserToCalendarByEmail(req, res) {
+    let eventUser = new Calendar_User();
     let user = new User();
     const {user_id, calendar_id} = req.body;
     user.find({id: user_id}).then(async (result) => {
@@ -205,6 +245,7 @@ module.exports = {
     createEvents,
     setNotification,
     getAllByMonth,
+    addUserToCalendarByEmail,
     addUserToEventsByEmail,
     getAcception
 }

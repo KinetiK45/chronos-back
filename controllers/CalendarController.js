@@ -1,12 +1,12 @@
 const Calendar = require("../models/calendars");
 const Response = require("../models/response");
 const User = require("../models/user");
-
+const Calendar_User = require('../models/event_users');
 async function createCalendar(req,res) {
     let calendar = new Calendar();
-    const {title, description} = req.body;
+    const {title, description,color} = req.body;
 
-    calendar.create(title, req.senderData.id, description).then((result) => {
+    calendar.create(title, req.senderData.id, description,color).then((result) => {
         calendar.find({id: result})
             .then(() => {
                 res.json(new Response(true, 'Calendar successfully create'));
@@ -61,17 +61,27 @@ async function deleteCalendar(req,res) {
 async function updateCalendar(req,res){
     try {
         let calendar = new Calendar();
-        const {calendar_id , title,description} = req.body;
-        const result = calendar.find({id: calendar_id });
-        if(result[0].id === await calendar.getDefaultCalendar(req.senderData.id)) {
-            res.json(new Response(false, "You cannot change default calendar"));
+        let shared_calendar = new Calendar_User();
+        const {calendar_id , title,description, color} = req.body;
+        if(await calendar.getTable(calendar_id,req.senderData.id) === true) {
+            const result = calendar.find({id: calendar_id});
+            if (result[0].id === await calendar.getDefaultCalendar(req.senderData.id)) {
+                res.json(new Response(false, "You cannot change default calendar"));
+            } else {
+                await calendar.updateById({
+                    id: result[0].id,
+                    title: title,
+                    description: description,
+                    color: color
+                });
+                res.json(new Response(true, 'Calendar successfully update'));
+            }
         }else {
-            await calendar.updateById({
+            const result = shared_calendar.find({user_id: req.senderData.id,calendar_id: calendar_id})
+            await shared_calendar.updateById({
                 id: result[0].id,
-                title: title,
-                description: description
-            });
-            res.json(new Response(true, 'Calendar successfully update'));
+                custom_color: color
+            })
         }
     }catch (error){
         console.log(error);

@@ -6,12 +6,13 @@ class Event_users extends Model{
         super("calendar_users");
     }
 
-    async create(user_id, calendar_id) {
+    async create(user_id, calendar_id, role_id = 2) {
         if (calendar_id === undefined || calendar_id === null) {
             calendar_id = await this.getDefaultCalendar(user_id);
         }
         this.user_id = user_id;
         this.calendar_id = calendar_id;
+        this.role_id = role_id;
         return this.insert();
     }
 

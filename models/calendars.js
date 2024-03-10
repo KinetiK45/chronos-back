@@ -6,10 +6,11 @@ class Calendars extends Model {
         super("calendars");
     }
 
-    create(title,user_id,description= null,type = 'own'){
+    create(title,user_id,description= null,color = '#ABABAB', type = 'own'){
         this.title = title;
         this.user_id = user_id;
         this.description = description;
+        this.color = color;
         this.type = type;
         return this.insert();
     }
@@ -35,10 +36,27 @@ class Calendars extends Model {
         }
     }
 
+    async getTable(calendar_id, user_id) {
+        const tableName = 'calendars';
+
+        const query = `
+            SELECT COUNT(*) AS count
+            FROM ${tableName} e
+            WHERE e.user_id = ? AND e.id = ?
+        `;
+        try {
+            const [rows] = await pool.execute(query, [user_id, calendar_id]);
+            const count = rows[0].count;
+            return count > 0;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getCalendars(user_id) {
         const tableName = 'calendars';
 
-        const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description','e.type'];
+        const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description','e.color','e.type'];
 
         const query = `
         SELECT ${selectColumns.join(',')} 
