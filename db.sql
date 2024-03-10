@@ -19,7 +19,6 @@ create table if not exists users
     password            varchar(30)  not null,
     email               varchar(256) not null unique,
     full_name           varchar(60)  not null,
-    photo               varchar(256) default 'default.png',
     race                varchar(60)  default 'istribitel mig-28 v sovershenstve',
     is_vlaDICK          boolean      default true
 );
@@ -45,6 +44,7 @@ create table if not exists events
     calendar_id int not null,
     description varchar(256),
     category enum ('arrangement','reminder','task'),
+    type enum('own','shared'),
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
 
@@ -60,6 +60,15 @@ create table if not exists calendar_users
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
 
+create table if not exists events_users
+(
+  id int not null  primary key auto_increment,
+  user_id int not null,
+  event_id  int not null,
+  foreign key (user_id) references users(id) on DELETE cascade,
+  foreign key (event_id) references events(id) on delete cascade
+);
+
 create table if not exists notifications
 (
     id         int          not null primary key auto_increment,
@@ -72,8 +81,9 @@ create table if not exists notifications
 create table if not exists chats
 (
     id          int not null primary key auto_increment,
-    calendar_id int not null,
-    foreign key (calendar_id) references calendars (id) on delete cascade
+    title varchar(20),
+    event_id int not null,
+    foreign key (event_id) references events (id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS messages

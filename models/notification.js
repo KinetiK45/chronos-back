@@ -13,7 +13,7 @@ class Notification extends Model{
     async getUpcomingEvents() {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category', 'u.email as user_email'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category', 'u.email as user_email','e.type'];
 
         const whereClauses = [
             'e.startAt > NOW()',

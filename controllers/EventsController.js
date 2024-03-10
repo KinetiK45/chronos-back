@@ -1,17 +1,18 @@
 const Response = require("../models/response");
 const Events = require("../models/events");
-const Calendar_User = require("../models/event_users");
-const {verifyToken, generateToken} = require("./TokenController");
+const Calendar_User = require("../models/calendar_users");
+const {generateToken} = require("./TokenController");
 const nodemailer = require("nodemailer");
 const Notification = require('../models/notification');
 const axios = require('axios');
 const moment = require('moment');
 const Calendar = require('../models/calendars')
-const e = require("express");
 const User = require("../models/user");
 const {verify} = require("jsonwebtoken");
 const Chat = require('../models/chat');
 const Type_Events = require('../models/type_events');
+const Events_Users = require('../models/events_users');
+
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -26,8 +27,8 @@ async function getAllByMonth(req, res) {
     try {
         let events = new Calendar_User();
         const period = req.params.period || 'month';
-        const {calendar_id, countryCode} = req.query;
-
+        const calendar_id = req.query;
+        console.log(calendar_id)
         let respData = {};
         // if (countryCode && Number.parseInt(calendar_id) === await events.getDefaultCalendar(req.senderData.id)){
         //     respData.events = [];
@@ -37,9 +38,9 @@ async function getAllByMonth(req, res) {
         const eventsMonth = await events.getByPeriod(period, calendar_id);
         if (eventsMonth && eventsMonth.length > 0) {
             respData.events = eventsMonth;
-            res.json(new Response(true, "All events by" + period, respData));
+            res.json(new Response(true, "All events by " + period, respData));
         } else {
-            res.json(new Response(true, "No events for the current" + period, respData));
+            res.json(new Response(true, "No events for the current " + period, respData));
         }
     } catch (error) {
         console.error(error);
@@ -78,7 +79,7 @@ async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
     let type = new Type_Events();
-    const {title, startAt, endAt, allDay, category, isNotification, description, calendar_id,place,complete} = req.body;
+    const {title, startAt, endAt, allDay, category, isNotification, description, calendar_id,place} = req.body;
     let eventUser = new Calendar_User();
     try {
         if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
@@ -87,9 +88,9 @@ async function createEvents(req, res) {
                 await notification.add(req.senderData.email, result);
             }
             if (category === "arrangement"){
-               await type.create(result.id,place);
+               await type.create(result,place);
             }else if(category === "task") {
-                await type.create(result.id,"");
+                await type.create(result,"");
             }
             res.json(new Response(true, 'Event create'));
         }
@@ -150,27 +151,26 @@ setInterval(async () => {
     }
 },  60 * 1000);
 
-async function getAcception(req,res){
+async function getAcceptionEvent(req,res) {
     try {
         const decodedToken = verify(req.params.token, 'secret key');
         console.log(decodedToken);
         let chat = new Chat();
-        let eventUser = new Calendar_User();
-        let calendar = new Calendar();
-        // let event =
-        eventUser.create(decodedToken.user_id,decodedToken.calendar_id)
+        let event = new Events();
+        let events_users = new Events_Users();
+        events_users.create(decodedToken.user_id,decodedToken.event_id)
             .then((result) => {
-                eventUser.find({ id: result })
+                events_users.find({ id: result })
                     .then(() => {
                         res.json(new Response(true, 'User successfully add'));
                     });
             }).catch((error) => {
-            console.log(error);
             res.json(new Response(false, error.toString()));
         });
-        await chat.creat(decodedToken.calendar_id);
-        await calendar.find({id: decodedToken.calendar_id}).then((result) => {
-            calendar.updateById({
+        const title = event.getEventTitle(decodedToken.event_id);
+        await chat.creat(title, decodedToken.event_id);
+        await event.find({id: decodedToken.event_id}).then((result) => {
+            event.updateById({
                 id: result,
                 type: 'shared'
             });
@@ -180,6 +180,7 @@ async function getAcception(req,res){
         res.json(new Response(false, error.toString()));
     }
 }
+
 async function addUserToEventsByEmail(req,res){
     let user = new User();
     let event  = new Events();
@@ -188,13 +189,13 @@ async function addUserToEventsByEmail(req,res){
         if (result.length === 0) {
             res.json(new Response(false, 'Not found user'));
         } else {
+            const title = await event.getEventTitle(event_id);
             const invitationCode = generateToken({user_id, event_id}, '36h');
-            const title = await event.find({ id: event_id});
             if(title != null) {
                 const mailOptions = {
                     to: result[0].email,
                     subject: 'Invite',
-                    text: `${req.senderData.full_name} invites you to join his event ${title.title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
+                    text: `${req.senderData.full_name} invites you to join his event ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
@@ -212,40 +213,10 @@ async function addUserToEventsByEmail(req,res){
     });
 }
 
-async function addUserToCalendarByEmail(req, res) {
-    let eventUser = new Calendar_User();
-    let user = new User();
-    const {user_id, calendar_id} = req.body;
-    user.find({id: user_id}).then(async (result) => {
-        if (result.length === 0) {
-            res.json(new Response(false, 'Not found user'));
-        } else if (calendar_id === await eventUser.getDefaultCalendar(req.senderData.id)) {
-            res.json(new Response(false, 'You cannot share the default calendar'));
-        } else {
-            const invitationCode = generateToken({user_id, calendar_id}, '36h');
-            const title = await eventUser.getCalendarTitle(req.senderData.id, calendar_id);
-            const mailOptions = {
-                to: result[0].email,
-                subject: 'Invite',
-                text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
-            };
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error(error);
-                } else {
-                    console.log('Email sent: ', info);
-                }
-            });
-            res.json(new Response(true, "Send invitation", {invitationCode}));
-        }
-    });
-}
-
 module.exports = {
     createEvents,
     setNotification,
     getAllByMonth,
-    addUserToCalendarByEmail,
     addUserToEventsByEmail,
-    getAcception
+    getAcceptionEvent
 }

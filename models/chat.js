@@ -4,8 +4,9 @@ class Chat extends Model {
     constructor() {
         super("chats");
     }
-    creat(calendar_id) {
-        this.calendar_id = calendar_id;
+    creat(title,event_id) {
+        this.title = title;
+        this.event_id = event_id;
         return this.insert();
     }
 }

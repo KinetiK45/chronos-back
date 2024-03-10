@@ -9,4 +9,7 @@ router.patch('/update',calendar.updateCalendar);
 router.get('/all', token_controller.verifyToken, calendar.getAllCalendars);
 router.get('/:id',calendar.getCalendarById);
 router.get('users/:calendar_id',calendar.getUserByCalendarId);
+router.post("/invite", token_controller.verifyToken, calendar.addUserToCalendarByEmail);
+router.post('/accept-invitation/:token',calendar.getAcceptionCalendar);
+
 module.exports = router

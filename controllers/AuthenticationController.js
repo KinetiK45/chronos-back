@@ -17,8 +17,8 @@ const transporter = nodemailer.createTransport({
 
 async function register(req, res) {
     let user = new User();
-    const {username,password,email,full_name,racist,race,is_vlaDICK,supporting_feminism,religion} = req.body;
-    user.registration(username,password,email,full_name,racist,race,is_vlaDICK,supporting_feminism,religion)
+    const {username,password,email,full_name,race,is_vlaDICK} = req.body;
+    user.registration(username,password,email,full_name,race,is_vlaDICK,)
         .then((result)=>{
             user.find({id: result})
                 .then(()=>{
