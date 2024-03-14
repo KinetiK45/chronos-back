@@ -44,7 +44,7 @@ class Events extends Model{
     async getUpcomingEvents(calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category', 'u.email','e.type'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay', 'e.category', 'u.email', 'e.place', 'e.type','e.complete'];
 
         const whereClauses = [
             'e.startAt > NOW()',

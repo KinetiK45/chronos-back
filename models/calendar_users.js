@@ -61,7 +61,7 @@ class Calendar_users extends Model{
     async getByPeriod(period,calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay','e.calendar_id','e.description', 'e.category','e.type'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay','e.calendar_id','e.description', 'e.category','e.place', 'e.type','e.complete'];
 
         const whereClauses = [
             'e.calendar_id = ?'
@@ -82,7 +82,6 @@ class Calendar_users extends Model{
         const query = `
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
-        join type_events te on e.id = te.events_id
         WHERE ${whereClauses.join(' AND ')}
         LIMIT 30;
     `;
