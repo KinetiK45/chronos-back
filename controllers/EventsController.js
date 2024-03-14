@@ -10,9 +10,7 @@ const Calendar = require('../models/calendars')
 const User = require("../models/user");
 const {verify} = require("jsonwebtoken");
 const Chat = require('../models/chat');
-const Type_Events = require('../models/type_events');
 const Events_Users = require('../models/events_users');
-
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -47,6 +45,7 @@ async function getAllByMonth(req, res) {
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
+
 async function getNationalHolidays(countryCode, period) {
     try {
         const year = new Date().getFullYear();
@@ -78,19 +77,18 @@ async function getNationalHolidays(countryCode, period) {
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    let type = new Type_Events();
     const {title, startAt, endAt, allDay, category, isNotification, description, calendar_id,place} = req.body;
     let eventUser = new Calendar_User();
     try {
         if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
-            const result = await events.create(title, startAt, endAt, allDay, category,description, calendar_id);
-            if (isNotification === true) {
-                await notification.add(req.senderData.email, result);
-            }
             if (category === "arrangement"){
-               await type.create(result,place);
+                await events.create(title, startAt, endAt, allDay, category,description, calendar_id,place);
             }else if(category === "task") {
-                await type.create(result,"");
+                await events.create(title, startAt, endAt, allDay, category,description, calendar_id,' ');
+            }
+            if (isNotification === true || category === 'reminder') {
+                const result = await events.create(title, startAt, endAt, allDay, category,description, calendar_id,' ');
+                await notification.add(req.senderData.email, result);
             }
             res.json(new Response(true, 'Event create'));
         }
@@ -98,6 +96,29 @@ async function createEvents(req, res) {
             res.json(new Response(false, 'its not your calendar'));
         }
     } catch (error) {
+        console.log(error);
+        res.json(new Response(false, error.toString()));
+    }
+}
+
+async function editEvents(req,res) {
+    let events = new Events();
+    const {id, title, startAt, endAt, allDay, category, description, place, complete} = req.body;
+    try {
+        events.find({id: id}).then((result) => {
+            events.updateById({
+                id: result[0].id,
+                title: title,
+                startAt: startAt,
+                endAt: endAt,
+                allDay: allDay,
+                category: category,
+                description: description,
+                place: place,
+                complete: complete
+            });
+        });
+    }catch (error) {
         console.log(error);
         res.json(new Response(false, error.toString()));
     }

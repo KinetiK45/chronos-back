@@ -44,7 +44,9 @@ create table if not exists events
     calendar_id int not null,
     description varchar(256),
     category enum ('arrangement','reminder','task'),
+    place varchar(80),
     type enum('own','shared'),
+    complete boolean default false,
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
 
@@ -97,14 +99,6 @@ CREATE TABLE IF NOT EXISTS messages
     FOREIGN KEY (chat_id) REFERENCES chats (id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (reply_to) REFERENCES messages (id) ON DELETE SET NULL
-);
-
-create table if not exists type_events(
-    id INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    events_id int not null,
-    place varchar(80),
-    complete boolean default false,
-    foreign key (events_id) references events(id) on DELETE cascade
 );
 
 INSERT INTO roles (role) VALUES
