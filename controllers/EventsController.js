@@ -239,5 +239,6 @@ module.exports = {
     setNotification,
     getAllByMonth,
     addUserToEventsByEmail,
-    getAcceptionEvent
+    getAcceptionEvent,
+    editEvents
 }

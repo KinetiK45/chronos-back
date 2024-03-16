@@ -8,5 +8,6 @@ router.post('/set_notification',token_controller.verifyToken, eventController.se
 router.get('/all/:period', token_controller.verifyToken, eventController.getAllByMonth);
 router.post("/invite", token_controller.verifyToken, eventController.addUserToEventsByEmail);
 router.post('/accept-invitation/:token',eventController.getAcceptionEvent);
+router.patch('/edit',eventController.editEvents)
 
 module.exports = router
