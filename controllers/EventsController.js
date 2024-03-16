@@ -124,6 +124,17 @@ async function editEvents(req,res) {
     }
 }
 
+async function deleteEvents(req,res) {
+    try {
+        let event = new Events();
+        const {id} = req.params
+        await event.delete({id: id});
+        res.json(new Response(true,"mashem xyami"));
+    }catch (error) {
+        res.json(new Response(false,"poshol naxyi"))
+    }
+}
+
 async function setNotification(req,res) {
     let notification = new Notification();
     const {event_id} = req.body;
@@ -240,5 +251,6 @@ module.exports = {
     getAllByMonth,
     addUserToEventsByEmail,
     getAcceptionEvent,
-    editEvents
+    editEvents,
+    deleteEvents
 }
