@@ -72,20 +72,26 @@ async function getNationalHolidays(countryCode, period) {
 async function createEvents(req, res) {
     let events = new Events();
     let notification = new Notification();
-    const {title, startAt, endAt, allDay, category, isNotification, description, calendar_id,place} = req.body;
+    const {title, startAt, endAt, category, isNotification, description, calendar_id,place} = req.body;
     let eventUser = new Calendar_User();
     try {
         if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
             if (category === "arrangement"){
-                await events.create(title, startAt, endAt, allDay, category,description, calendar_id,place);
+                await events.create(title, startAt, endAt, category,description, calendar_id,place).then((result =>{
+                    res.json(new Response(true,'Event create', result));
+                }));
             }else if(category === "task") {
-                await events.create(title, startAt, endAt, allDay, category,description, calendar_id,' ');
+                await events.create(title, startAt, endAt, category,description, calendar_id,' ').then((result => {
+                    res.json(new Response(true,'Event create', result));
+                }));
+
             }
             if (isNotification === true || category === 'reminder') {
-                const result = await events.create(title, startAt, endAt, allDay, category,description, calendar_id,' ');
-                await notification.add(req.senderData.email, result);
+                await events.create(title, startAt, endAt, category,description, calendar_id,' ').then((result) => {
+                    res.json(new Response(true,'Event create', result));
+                    notification.add(req.senderData.email, result);
+                });
             }
-            res.json(new Response(true, 'Event create'));
         }
         else {
             res.json(new Response(false, 'its not your calendar'));
@@ -98,7 +104,7 @@ async function createEvents(req, res) {
 
 async function editEvents(req,res) {
     let events = new Events();
-    const {id, title, startAt, endAt, allDay, category, description, place, complete} = req.body;
+    const {id, title, startAt, endAt, category, description, place, complete} = req.body;
     try {
         events.find({id: id}).then((result) => {
             events.updateById({
@@ -106,12 +112,12 @@ async function editEvents(req,res) {
                 title: title,
                 startAt: startAt,
                 endAt: endAt,
-                allDay: allDay,
                 category: category,
                 description: description,
                 place: place,
                 complete: complete
             });
+            res.json(new Response(true, "Successfully edited"));
         });
     }catch (error) {
         console.log(error);

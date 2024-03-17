@@ -61,7 +61,7 @@ class Calendar_users extends Model{
     async getByPeriod(period,calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.allDay','e.calendar_id','e.description', 'e.category','e.place', 'e.type','e.complete'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt','e.calendar_id','e.description', 'e.category','e.place', 'e.type','e.complete'];
 
         const whereClauses = [
             'e.calendar_id = ?'

@@ -41,7 +41,6 @@ create table if not exists events
     title    varchar(256) not null,
     startAt  datetime     not null,
     endAt    datetime     not null,
-    allDay   boolean      not null,
     calendar_id int not null,
     description varchar(256),
     category enum ('arrangement','reminder','task'),
