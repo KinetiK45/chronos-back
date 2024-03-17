@@ -21,19 +21,29 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+function convertToDateTime(dateString) {
+    const parts = dateString.split('-');
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1;
+    const day = parseInt(parts[2]);
+    const date = new Date(year, month, day);
+    date.setHours(0,0, 0, 0);
+    return date;
+}
+
 async function getAllByMonth(req, res) {
     try {
         let events = new Calendar_User();
-        const period = 'month';
-        const {calendar_id} = req.params;
+        const {calendar_id,startAt,endAt} = req.query;
         console.log(calendar_id)
+
         let respData = {};
-        const eventsMonth = await events.getByPeriod(period, calendar_id);
+        const eventsMonth = await events.getByPeriod(convertToDateTime(startAt),convertToDateTime(endAt), calendar_id);
         if (eventsMonth && eventsMonth.length > 0) {
             respData.events = eventsMonth;
-            res.json(new Response(true, "All events by " + period, respData));
+            res.json(new Response(true, "All events start from" + startAt+ "and end" + endAt, respData));
         } else {
-            res.json(new Response(true, "No events for the current " + period, respData));
+            res.json(new Response(true, "No events for the from" + startAt+ "and end" + endAt, respData));
         }
     } catch (error) {
         console.error(error);

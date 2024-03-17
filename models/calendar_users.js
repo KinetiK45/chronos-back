@@ -58,26 +58,16 @@ class Calendar_users extends Model{
         }
     }
 
-    async getByPeriod(period,calendar_id) {
+    async getByPeriod(startAt,endAt,calendar_id) {
         const tableName = 'events';
 
         const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt','e.calendar_id','e.description', 'e.category','e.place', 'e.type','e.complete'];
 
         const whereClauses = [
-            'e.calendar_id = ?'
+            'e.calendar_id = ?',
+            'e.startAt >= ?',
+            'e.endAt <= ?'
         ];
-
-        switch (period) {
-            case 'day':
-                whereClauses.push('DATE(e.startAt) = CURDATE()');
-                break;
-            case 'week':
-                whereClauses.push('YEARWEEK(e.startAt, 1) = YEARWEEK(CURDATE(), 1)');
-                break;
-            case 'month':
-                whereClauses.push('MONTH(e.startAt) = MONTH(CURDATE())');
-                break;
-        }
 
         const query = `
         SELECT ${selectColumns.join(', ')}
@@ -87,7 +77,7 @@ class Calendar_users extends Model{
     `;
 
         try {
-            const [rows] = await pool.execute(query,[calendar_id]);
+            const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
             console.log(rows)
             return rows;
         } catch (error) {
