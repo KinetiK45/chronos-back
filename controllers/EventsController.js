@@ -34,8 +34,11 @@ function convertToDateTime(dateString) {
 async function getAllByMonth(req, res) {
     try {
         let events = new Calendar_User();
-        const { calendar_id, startAt, endAt } = req.params;
-        console.log({calendar_id,startAt,endAt})
+        const {calendar_id} = req.params;
+        const {startAt, endAt} = req.query;
+        if (startAt || endAt){
+            return res.json(new Response(false, 'invalid startAt/endAt params'));
+        }
 
         let respData = {};
         const eventsMonth = await events.getByPeriod(convertToDateTime(startAt),convertToDateTime(endAt), calendar_id);

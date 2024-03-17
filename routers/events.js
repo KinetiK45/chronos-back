@@ -5,7 +5,7 @@ const token_controller = require("../controllers/TokenController");
 
 router.post('/new_events', token_controller.verifyToken, eventController.createEvents);
 router.post('/set_notification', token_controller.verifyToken, eventController.setNotification);
-router.get('/byPeriod/:calendar_id/:startAt/:endAt', token_controller.verifyToken, eventController.getAllByMonth);
+router.get('/byCalendarPeriod/:calendar_id', token_controller.verifyToken, eventController.getAllByMonth);
 router.post("/invite", token_controller.verifyToken, eventController.addUserToEventsByEmail);
 router.post('/accept-invitation/:token', eventController.getAcceptionEvent);
 router.patch('/edit', eventController.editEvents);
