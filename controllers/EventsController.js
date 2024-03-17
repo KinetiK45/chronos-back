@@ -22,31 +22,33 @@ const transporter = nodemailer.createTransport({
 });
 
 function convertToDateTime(dateString) {
-    const parts = dateString.split('-');
-    const year = parseInt(parts[0]);
-    const month = parseInt(parts[1]) - 1;
-    const day = parseInt(parts[2]);
-    const date = new Date(year, month, day);
-    date.setHours(0,0, 0, 0);
-    return date;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return "Invalid date";
+    }
+    date.setHours(0, 0, 0, 0);
+    return date.toISOString();
 }
+
 
 async function getAllByMonth(req, res) {
     try {
         let events = new Calendar_User();
         const {calendar_id} = req.params;
         const {startAt, endAt} = req.query;
-        if (startAt || endAt){
+        console.log({startAt, endAt})
+        if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
             return res.json(new Response(false, 'invalid startAt/endAt params'));
         }
-
-        let respData = {};
-        const eventsMonth = await events.getByPeriod(convertToDateTime(startAt),convertToDateTime(endAt), calendar_id);
-        if (eventsMonth && eventsMonth.length > 0) {
-            respData.events = eventsMonth;
-            res.json(new Response(true, "All events start from" + startAt+ "and end" + endAt, respData));
-        } else {
-            res.json(new Response(true, "No events for the from" + startAt+ "and end" + endAt, respData));
+        else {
+            let respData = {};
+            const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
+            if (eventsMonth && eventsMonth.length > 0) {
+                respData.events = eventsMonth;
+                res.json(new Response(true, "All events start from" + startAt + "and end" + endAt, respData));
+            } else {
+                res.json(new Response(true, "No events for the from" + startAt + "and end" + endAt, respData));
+            }
         }
     } catch (error) {
         console.error(error);
