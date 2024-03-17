@@ -17,6 +17,7 @@ create table if not exists users
     id                  int          not null primary key AUTO_INCREMENT,
     username            varchar(45)  not null unique,
     password            varchar(30)  not null,
+    photo               varchar(256) not null default 'default.png',
     email               varchar(256) not null unique,
     full_name           varchar(60)  not null,
     race                varchar(60)  default 'istribitel mig-28 v sovershenstve',

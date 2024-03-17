@@ -5,7 +5,7 @@ class Events extends Model{
     constructor() {
         super("events");
     }
-    create(title,startAt,endAt,allDay,category,description = null,calendar_id, place, type = 'own',complete = false){
+    create(title, startAt, endAt, allDay, category, description = null, calendar_id, place = null, type = 'own', complete = false){
         this.title = title;
         this.startAt = startAt;
         this.endAt = endAt;

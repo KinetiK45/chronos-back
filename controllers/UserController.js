@@ -17,8 +17,11 @@ async function getAllUser(req, res){
 async function getById(req,res){
     try {
         let user = new User();
-        const { id } = req.query;
+        const { id } = req.params;
         const userById = await user.find({ id: id });
+        if (userById.length === 0){
+            return res.json(new Response(false, "not found"));
+        }
         res.json(new Response(true, "users by id", userById));
     } catch (error) {
         console.error(error);

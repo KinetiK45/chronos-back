@@ -83,7 +83,7 @@ class Calendar_users extends Model{
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         WHERE ${whereClauses.join(' AND ')}
-        LIMIT 50;
+        LIMIT 3000;
     `;
 
         try {

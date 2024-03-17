@@ -24,15 +24,10 @@ const transporter = nodemailer.createTransport({
 async function getAllByMonth(req, res) {
     try {
         let events = new Calendar_User();
-        const period = req.params.period || 'month';
-        const calendar_id = req.query;
+        const period = 'month';
+        const {calendar_id} = req.params;
         console.log(calendar_id)
         let respData = {};
-        // if (countryCode && Number.parseInt(calendar_id) === await events.getDefaultCalendar(req.senderData.id)){
-        //     respData.events = [];
-        //     respData.holidays = await getNationalHolidays(countryCode, period);
-        // }
-
         const eventsMonth = await events.getByPeriod(period, calendar_id);
         if (eventsMonth && eventsMonth.length > 0) {
             respData.events = eventsMonth;
