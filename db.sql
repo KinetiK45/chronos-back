@@ -45,7 +45,7 @@ create table if not exists events
     description varchar(256),
     category enum ('arrangement','reminder','task'),
     place varchar(80),
-    type enum('own','shared'),
+    creator_id int not null,
     complete boolean default false,
     foreign key (calendar_id) references calendars (id) on delete cascade
 );

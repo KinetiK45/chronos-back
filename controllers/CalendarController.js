@@ -11,9 +11,9 @@ const Events_Users = require("../models/events_users");
 
 async function createCalendar(req,res) {
     let calendar = new Calendar();
-    const {title, description,color} = req.body;
+    const {title, description, color} = req.body;
 
-    calendar.create(title, req.senderData.id, description,color).then((result) => {
+    calendar.create(title, req.senderData.id, description, color).then((result) => {
         calendar.find({id: result})
             .then(() => {
                 res.json(new Response(true, 'Calendar successfully create'));
@@ -88,7 +88,9 @@ async function updateCalendar(req,res){
             await shared_calendar.updateById({
                 id: result[0].id,
                 custom_color: color
+                //other fields
             })
+            //resp...
         }
     }catch (error){
         console.log(error);

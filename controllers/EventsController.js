@@ -41,13 +41,16 @@ async function getAllByMonth(req, res) {
             return res.json(new Response(false, 'invalid startAt/endAt params'));
         }
         else {
-            let respData = {};
             const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
+            // для каждого ивента find calendar_users where creator_id = user_id && calendar_id = calendar_id
+            for (const eventsMonthElement of eventsMonth) {
+                eventsMonthElement.color = 'найденный цвет';
+            }
+
             if (eventsMonth && eventsMonth.length > 0) {
-                respData.events = eventsMonth;
-                res.json(new Response(true, "All events start from" + startAt + "and end" + endAt, respData));
+                res.json(new Response(true, "All events start from" + startAt + "and end" + endAt, {events: eventsMonth}));
             } else {
-                res.json(new Response(true, "No events for the from" + startAt + "and end" + endAt, respData));
+                res.json(new Response(true, "No events for the from" + startAt + "and end" + endAt, {}));
             }
         }
     } catch (error) {
@@ -120,6 +123,9 @@ async function createEvents(req, res) {
 async function editEvents(req,res) {
     let events = new Events();
     const {id, title, startAt, endAt, category, description, place, complete} = req.body;
+    if (!id){
+        return res.json(new Response(false, 'No id provided'));
+    }
     try {
         events.find({id: id}).then((result) => {
             events.updateById({

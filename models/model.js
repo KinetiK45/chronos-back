@@ -106,6 +106,9 @@ class Model {
     }
 
     async updateById(updatedFields) {
+        updatedFields = Object.fromEntries(
+            Object.entries(updatedFields).filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+        );
         const keys = Object.keys(updatedFields).filter(key => key !== 'id');
         const setClauses = keys.map(key => `${key} = ?`).join(', ');
         const values = keys.map(key => updatedFields[key]);
