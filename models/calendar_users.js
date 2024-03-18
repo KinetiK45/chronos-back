@@ -98,15 +98,16 @@ class Calendar_users extends Model{
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         WHERE ${whereClauses.join(' AND ')}
-        LIMIT 3000;
+        LIMIT 1;
     `;
 
         try {
             const [rows] = await pool.execute(query,[calendar_id,creator_id]);
-            console.log(rows)
-            return rows;
+            if (rows.length !== 0)
+                return rows[0].custom_color;
+            return undefined;
         } catch (error) {
-            throw error;
+            return undefined;
         }
     }
 

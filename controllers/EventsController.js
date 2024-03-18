@@ -45,8 +45,9 @@ async function getAllByMonth(req, res) {
             const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
             // для каждого ивента find calendar_users where creator_id = user_id && calendar_id = calendar_id
             for (const eventsMonthElement of eventsMonth) {
-                eventsMonthElement.color = await events.findColor(eventsMonthElement.calendar_id,req.senderData.id);
-                console.log(eventsMonthElement.color);
+                const color_found = await events.findColor(eventsMonthElement.calendar_id, eventsMonthElement.creator_id);
+                if (color_found)
+                    eventsMonthElement.color = color_found;
             }
 
             if (eventsMonth && eventsMonth.length > 0) {
