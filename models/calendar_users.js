@@ -6,10 +6,11 @@ class Calendar_users extends Model{
         super("calendar_users");
     }
 
-    async create(user_id, calendar_id, role_id = 2) {
+    async create(custom_color,user_id,calendar_id, role_id = 2) {
         if (calendar_id === undefined || calendar_id === null) {
             calendar_id = await this.getDefaultCalendar(user_id);
         }
+        this.custom_color = custom_color;
         this.user_id = user_id;
         this.calendar_id = calendar_id;
         this.role_id = role_id;
@@ -53,32 +54,6 @@ class Calendar_users extends Model{
             } else {
                 return null;
             }
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async findAllColor(calendar_id) {
-        const tableName = 'calendar_users';
-
-        const selectColumns = ['e.custom_color']
-
-        const whereClauses = [
-            'e.calendar_id = ?',
-        ]
-
-        const query = `
-        SELECT ${selectColumns.join(', ')}
-        FROM ${tableName} e
-        left join calendars c on e.id = e.calendar_id
-        WHERE ${whereClauses.join(' AND ')}
-        LIMIT 3000;
-    `;
-
-        try {
-            const [rows] = await pool.execute(query,[calendar_id]);
-            console.log(rows)
-            return rows;
         } catch (error) {
             throw error;
         }

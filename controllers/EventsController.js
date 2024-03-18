@@ -224,7 +224,7 @@ async function getAcceptionEvent(req,res) {
             }).catch((error) => {
             res.json(new Response(false, error.toString()));
         });
-        const title = event.getEventTitle(decodedToken.event_id);
+        const title =  await event.getEventTitle(decodedToken.event_id);
         await chat.creat(title, decodedToken.event_id);
         await event.find({id: decodedToken.event_id}).then((result) => {
             event.updateById({

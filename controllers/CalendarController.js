@@ -147,7 +147,7 @@ async function getAcceptionCalendar(req,res){
         let chat = new Chat();
         let calendar_users = new Calendar_User();
         let calendar = new Calendar();
-        calendar_users.create(decodedToken.user_id,decodedToken.calendar_id)
+        calendar_users.create('#a2a2a2',decodedToken.user_id,decodedToken.calendar_id)
             .then((result) => {
                 calendar_users.find({ id: result })
                     .then(() => {
@@ -175,14 +175,8 @@ async function getAcceptionCalendar(req,res){
             for (const event of events_by_calendar_id ) {
                 await chat.creat(event.title,event.id);
                 await events_users.create(decodedToken.user_id,event.id);
-                console.log("chat create by event_id " + event.id);
-                console.log("new event events_users " + event.id);
             }
         }
-        // else {
-            // res.json(new Response(false,"Don't have any events"));
-        // }
-
     } catch (error) {
         console.error(error);
         res.json(new Response(false, error.toString()));
