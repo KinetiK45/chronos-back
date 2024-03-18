@@ -36,7 +36,8 @@ async function getAllByMonth(req, res) {
         let events = new Calendar_User();
         const {calendar_id} = req.params;
         const {startAt, endAt} = req.query;
-        console.log({startAt, endAt})
+        let user = req.senderData.id;
+        console.log({startAt, endAt, user })
         if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
             return res.json(new Response(false, 'invalid startAt/endAt params'));
         }
@@ -44,13 +45,14 @@ async function getAllByMonth(req, res) {
             const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
             // для каждого ивента find calendar_users where creator_id = user_id && calendar_id = calendar_id
             for (const eventsMonthElement of eventsMonth) {
-                eventsMonthElement.color = 'найденный цвет';
+                eventsMonthElement.color = await events.findColor(eventsMonthElement.calendar_id,req.senderData.id);
+                console.log(eventsMonthElement.color);
             }
 
             if (eventsMonth && eventsMonth.length > 0) {
-                res.json(new Response(true, "All events start from" + startAt + "and end" + endAt, {events: eventsMonth}));
+                res.json(new Response(true, "All events start from " + startAt + " and end " + endAt, {events: eventsMonth}));
             } else {
-                res.json(new Response(true, "No events for the from" + startAt + "and end" + endAt, {}));
+                res.json(new Response(true, "No events for the from " + startAt + " and end " + endAt, {}));
             }
         }
     } catch (error) {
@@ -95,17 +97,17 @@ async function createEvents(req, res) {
     try {
         if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
             if (category === "arrangement"){
-                await events.create(title, startAt, endAt, category,description, calendar_id,place).then((result =>{
+                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,place).then((result =>{
                     res.json(new Response(true,'Event create', result));
                 }));
             }else if(category === "task") {
-                await events.create(title, startAt, endAt, category,description, calendar_id,' ').then((result => {
+                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,' ').then((result => {
                     res.json(new Response(true,'Event create', result));
                 }));
 
             }
             if (isNotification === true || category === 'reminder') {
-                await events.create(title, startAt, endAt, category,description, calendar_id,' ').then((result) => {
+                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,' ').then((result) => {
                     res.json(new Response(true,'Event create', result));
                     notification.add(req.senderData.email, result);
                 });

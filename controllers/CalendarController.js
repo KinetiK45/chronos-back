@@ -84,13 +84,15 @@ async function updateCalendar(req,res){
                 res.json(new Response(true, 'Calendar successfully update'));
             }
         }else {
-            const result = shared_calendar.find({user_id: req.senderData.id,calendar_id: calendar_id})
+            const result = shared_calendar.find({user_id: req.senderData.id, calendar_id: calendar_id})
             await shared_calendar.updateById({
                 id: result[0].id,
-                custom_color: color
-                //other fields
+                custom_color: color,
+                user_id: result[0].user_id,
+                calendar_id: calendar_id,
+                role_id: result[0].role_id
             })
-            //resp...
+            res.json(new Response(true,'Calendar successfully update'));
         }
     }catch (error){
         console.log(error);
@@ -157,26 +159,29 @@ async function getAcceptionCalendar(req,res){
         });
         await calendar.find({id: decodedToken.calendar_id}).then((result) => {
             calendar.updateById({
-                id: result,
+                id: result[0].id,
+                title: result[0].title,
+                user_id: result[0].user_id,
+                description: result[0].description,
+                color: result[0].color,
                 type: 'shared'
             });
         });
         let events = new Event();
-        const events_by_calendar_id = events.getUpcomingEvents(decodedToken.calendar_id);
-        if(events_by_calendar_id != null){
+        let events_users = new Events_Users();
+        const events_by_calendar_id = await events.getUpcomingEvents(decodedToken.calendar_id);
+        console.log("upcoming event" + {events_by_calendar_id});
+        if (Array.isArray(events_by_calendar_id)){
             for (const event of events_by_calendar_id ) {
                 await chat.creat(event.title,event.id);
+                await events_users.create(decodedToken.user_id,event.id);
                 console.log("chat create by event_id " + event.id);
-                await events.find({id: event.id}).then((result) => {
-                    events.updateById({
-                        id: result,
-                        type: 'shared'
-                    });
-                });
+                console.log("new event events_users " + event.id);
             }
-        }else {
-            res.json(new Response(true,"Don't have any events"));
         }
+        // else {
+            // res.json(new Response(false,"Don't have any events"));
+        // }
 
     } catch (error) {
         console.error(error);

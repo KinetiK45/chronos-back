@@ -5,15 +5,15 @@ class Events extends Model{
     constructor() {
         super("events");
     }
-    create(title, startAt, endAt, category, description = null, calendar_id, place = null, type = 'own', complete = false){
+    create(title, startAt, endAt, category, description = null, calendar_id, creator_id, place = null, complete = false){
         this.title = title;
         this.startAt = startAt;
         this.endAt = endAt;
         this.category = category;
         this.description = description;
+        this.creator_id = creator_id;
         this.calendar_id = calendar_id;
         this.place = place;
-        this.type = type;
         this.complete = complete;
         return this.insert();
     }
@@ -43,7 +43,7 @@ class Events extends Model{
     async getUpcomingEvents(calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.category', 'u.email', 'e.place', 'e.type','e.complete'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.category', 'e.place', 'e.creator_id', 'e.complete'];
 
         const whereClauses = [
             'e.startAt > NOW()',
@@ -64,6 +64,7 @@ class Events extends Model{
             throw error;
         }
     }
+
     async  hasCalendars(user_id, calendar_id) {
         const tableName = 'calendars';
 
