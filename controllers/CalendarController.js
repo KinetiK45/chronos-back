@@ -31,9 +31,14 @@ async function getCalendarById(req,res) {
         let calendar = new Calendar();
         let calendars_users = new Calendar_User();
         const calendars = await calendar.find({id: calendar_id});
+        if (calendars.length === 0){
+            return res.json(new Response(false, 'not found'));
+        }
         const result = await calendars_users.find({user_id : req.senderData.id, calendar_id: calendar_id});
-        calendars[0].color = result[0].custom_color;
-        res.json(new Response(true, "calendar user", {calendars: calendars, calendar_user: result}));
+        if (result.length > 0){
+            calendars[0].calendar_user = result[0];
+        }
+        res.json(new Response(true, "calendar user", calendars[0]));
 
     }catch (error) {
         console.log(error);
