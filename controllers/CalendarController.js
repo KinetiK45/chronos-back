@@ -99,7 +99,6 @@ async function updateCalendar(req,res){
                 custom_color: color,
                 user_id: result[0].user_id,
                 calendar_id: calendar_id,
-                role_id: result[0].role_id
             })
             res.json(new Response(true,'Calendar successfully update'));
         }
@@ -189,6 +188,23 @@ async function getAcceptionCalendar(req,res){
     } catch (error) {
         console.error(error);
         res.json(new Response(false, error.toString()));
+    }
+}
+
+async function updeteRole(res,req){
+    let calendars = new Calendar();
+    const {calendar_id,user_id,role} = req.body;
+    if(await calendars.getTable(calendar_id,req.senderData.id) === true) {
+        let calendars_users = new Calendar_User();
+        calendars_users.find({calendar_id: calendar_id,user_id:user_id }).then((result) =>{
+            calendars_users.updateById({
+                id: result[0].id,
+                role: role
+            })
+        })
+        res.json(new Response(true,"obnovil naxui"));
+    } else {
+        res.json(new Response(false,"poshol naxyi ne xhataet prav "));
     }
 }
 

@@ -56,8 +56,7 @@ create table if not exists calendar_users
     custom_color VARCHAR(7),
     user_id     int not null,
     calendar_id    int not null,
-    role_id             int          not null,
-    FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
+    role  enum('editor','inspector') not null ,
     foreign key (user_id) references users (id) on delete cascade,
     foreign key (calendar_id) references calendars (id) on delete cascade
 );
@@ -101,6 +100,3 @@ CREATE TABLE IF NOT EXISTS messages
     FOREIGN KEY (reply_to) REFERENCES messages (id) ON DELETE SET NULL
 );
 
-INSERT INTO roles (role) VALUES
-('editor'),
-('inspector');

@@ -6,14 +6,14 @@ class Calendar_users extends Model{
         super("calendar_users");
     }
 
-    async create(custom_color,user_id,calendar_id, role_id = 2) {
+    async create(custom_color,user_id,calendar_id, role = 'inspector') {
         if (calendar_id === undefined || calendar_id === null) {
             calendar_id = await this.getDefaultCalendar(user_id);
         }
         this.custom_color = custom_color;
         this.user_id = user_id;
         this.calendar_id = calendar_id;
-        this.role_id = role_id;
+        this.role = role;
         return this.insert();
     }
 
