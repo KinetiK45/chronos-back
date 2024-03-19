@@ -30,13 +30,11 @@ async function getCalendarById(req,res) {
         console.log(calendar_id);
         let calendar = new Calendar();
         let calendars_users = new Calendar_User();
-        if(await calendar.getTable(calendar_id,req.senderData.id) === true){
-            const calendars = await calendar.find({id: calendar_id});
-            res.json(new Response(true, "calendar", {calendar: calendars}));
-        }else {
-            const result = await calendars_users.find({calendar_id : calendar_id});
-            res.json(new Response(true, "calendar user", {calendar_user: result}));
-        }
+        const calendars = await calendar.find({id: calendar_id});
+            const result = await calendars_users.find({user_id : req.senderData.id, calendar_id: calendar_id});
+            calendars[0].color = result[0].custom_color;
+        res.json(new Response(true, "calendar user", {calendars: calendars, calendar_user: result}));
+
     }catch (error) {
         console.log(error);
         res.json(new Response(false, error.toString()));
