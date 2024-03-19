@@ -31,8 +31,8 @@ async function getCalendarById(req,res) {
         let calendar = new Calendar();
         let calendars_users = new Calendar_User();
         const calendars = await calendar.find({id: calendar_id});
-            const result = await calendars_users.find({user_id : req.senderData.id, calendar_id: calendar_id});
-            calendars[0].color = result[0].custom_color;
+        const result = await calendars_users.find({user_id : req.senderData.id, calendar_id: calendar_id});
+        calendars[0].color = result[0].custom_color;
         res.json(new Response(true, "calendar user", {calendars: calendars, calendar_user: result}));
 
     }catch (error) {
