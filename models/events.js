@@ -5,7 +5,7 @@ class Events extends Model{
     constructor() {
         super("events");
     }
-    create(title, startAt, endAt, category, description = null, calendar_id, creator_id, place = null, complete = false){
+    create(title, startAt, endAt, category, description = ' ', calendar_id, creator_id, place = ' ', complete = false){
         this.title = title;
         this.startAt = startAt;
         this.endAt = endAt;
@@ -65,21 +65,28 @@ class Events extends Model{
         }
     }
 
-    async  hasCalendars(user_id, calendar_id) {
+    async getCalendarType(calendar_id) {
         const tableName = 'calendars';
 
+        const selectColumns = ['e.type']
+
+        const whereClauses = [
+            'e.id = ?',
+        ]
+
         const query = `
-        SELECT COUNT(*) AS count
+        SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
-        LEFT JOIN calendar_users eu ON e.id = eu.calendar_id
-        WHERE (eu.user_id = ? OR e.user_id = ?) AND e.id = ?
-        LIMIT 1;
-    `;
+        WHERE ${whereClauses.join(' AND ')}
+        `;
 
         try {
-            const [rows] = await pool.execute(query, [user_id, user_id, calendar_id]);
-            const count = rows[0].count;
-            return count > 0;
+            const [rows] = await pool.execute(query, [calendar_id]);
+            if (rows.length > 0) {
+                return rows[0].type;
+            } else {
+                return null;
+            }
         } catch (error) {
             throw error;
         }

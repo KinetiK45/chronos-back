@@ -1,5 +1,6 @@
 const Model = require("./model");
 const pool = require("../db");
+const e = require("express");
 
 class Calendar_users extends Model{
     constructor() {
@@ -7,9 +8,6 @@ class Calendar_users extends Model{
     }
 
     async create(custom_color,user_id,calendar_id, role = 'inspector') {
-        if (calendar_id === undefined || calendar_id === null) {
-            calendar_id = await this.getDefaultCalendar(user_id);
-        }
         this.custom_color = custom_color;
         this.user_id = user_id;
         this.calendar_id = calendar_id;
@@ -49,7 +47,6 @@ class Calendar_users extends Model{
         try {
             const [rows] = await pool.execute(query, [user_id, calendar_id]);
             if (rows.length > 0) {
-                console.log(rows[0].title);
                 return rows[0].title;
             } else {
                 return null;
@@ -108,6 +105,53 @@ class Calendar_users extends Model{
             const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
             console.log(rows)
             return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getUserRole(user_id, calendar_id) {
+        const tableName = 'calendar_users';
+
+        const selectColumns = ['e.role']
+
+        const whereClauses = [
+            'e.calendar_id = ?',
+            'e.user_id = ?'
+        ]
+
+        const query = `
+            SELECT ${selectColumns.join(', ')}
+            FROM ${tableName} e
+            WHERE ${whereClauses.join(' AND ')}
+                LIMIT 1;
+        `;
+
+        try {
+            const [rows] = await pool.execute(query,[calendar_id,user_id]);
+            if(rows.length > 0){
+                return rows[0].role;
+            }else {
+                return null;
+            }
+        } catch (error) {
+            return error;
+        }
+    }
+    async  hasCalendars(user_id, calendar_id) {
+        const tableName = 'calendars';
+
+        const query = `
+        SELECT COUNT(*) AS count
+        FROM ${tableName} e
+        LEFT JOIN calendar_users eu ON e.id = eu.calendar_id
+        WHERE (eu.user_id = ? OR e.user_id = ?) AND e.id = ?
+        LIMIT 1;
+    `;
+
+        try {
+            const [rows] = await pool.execute(query, [user_id, user_id, calendar_id]);
+            const count = rows[0].count;
+            return count > 0;
         } catch (error) {
             throw error;
         }

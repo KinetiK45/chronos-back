@@ -14,10 +14,7 @@ async function createCalendar(req,res) {
     const {title, description, color} = req.body;
 
     calendar.create(title, req.senderData.id, description, color).then((result) => {
-        calendar.find({id: result})
-            .then(() => {
-                res.json(new Response(true, 'Calendar successfully create'));
-            });
+        res.json(new Response(true, 'Calendar successfully create', result));
     }).catch((error) => {
         console.log(error);
         res.json(new Response(false, error.toString()));
@@ -27,9 +24,11 @@ async function createCalendar(req,res) {
 async function getCalendarById(req,res) {
     try {
         const calendar_id = req.params.id;
-        console.log(calendar_id);
         let calendar = new Calendar();
         let calendars_users = new Calendar_User();
+        if (!(await calendars_users.hasCalendars(req.senderData.id, calendar_id))) {
+            return res.json(new Response(false, "It's not your calendar"));
+        }
         const calendars = await calendar.find({id: calendar_id});
         if (calendars.length === 0){
             return res.json(new Response(false, 'not found'));
@@ -41,7 +40,6 @@ async function getCalendarById(req,res) {
         res.json(new Response(true, "calendar user", calendars[0]));
 
     }catch (error) {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -191,17 +189,17 @@ async function getAcceptionCalendar(req,res){
     }
 }
 
-async function updeteRole(res,req){
+async function updateRole(res,req){
     let calendars = new Calendar();
     const {calendar_id,user_id,role} = req.body;
     if(await calendars.getTable(calendar_id,req.senderData.id) === true) {
         let calendars_users = new Calendar_User();
-        calendars_users.find({calendar_id: calendar_id,user_id:user_id }).then((result) =>{
+        calendars_users.find({calendar_id: calendar_id, user_id:user_id }).then((result) =>{
             calendars_users.updateById({
                 id: result[0].id,
                 role: role
-            })
-        })
+            });
+        });
         res.json(new Response(true,"obnovil naxui"));
     } else {
         res.json(new Response(false,"poshol naxyi ne xhataet prav "));

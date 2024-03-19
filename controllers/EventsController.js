@@ -43,7 +43,6 @@ async function getAllByMonth(req, res) {
         }
         else {
             const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
-            // для каждого ивента find calendar_users where creator_id = user_id && calendar_id = calendar_id
             for (const eventsMonthElement of eventsMonth) {
                 const color_found = await events.findColor(eventsMonthElement.calendar_id, eventsMonthElement.creator_id);
                 if (color_found)
@@ -90,38 +89,42 @@ async function getNationalHolidays(countryCode, period) {
     }
 }
 
-async function createEvents(req, res) {
-    let events = new Events();
-    let notification = new Notification();
-    const {title, startAt, endAt, category, isNotification, description, calendar_id,place} = req.body;
-    let eventUser = new Calendar_User();
-    try {
-        if (await events.hasCalendars(req.senderData.id, calendar_id) === true) {
-            if (category === "arrangement"){
-                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,place).then((result =>{
-                    res.json(new Response(true,'Event create', result));
-                }));
-            }else if(category === "task") {
-                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,' ').then((result => {
-                    res.json(new Response(true,'Event create', result));
-                }));
 
-            }
-            if (isNotification === true || category === 'reminder') {
-                await events.create(title, startAt, endAt, category,description, calendar_id, req.senderData.id,' ').then((result) => {
-                    res.json(new Response(true,'Event create', result));
-                    notification.add(req.senderData.email, result);
-                });
-            }
+async function createEvents(req, res) {
+    const events = new Events();
+    const notification = new Notification();
+    const {title, startAt, endAt, category, isNotification, description, calendar_id, place} = req.body;
+    const chat = new Chat();
+    const calendar_user = new Calendar_User();
+    try {
+        if (!(await calendar_user.hasCalendars(req.senderData.id, calendar_id))) {
+            return res.json(new Response(false, "It's not your calendar"));
         }
-        else {
-            res.json(new Response(false, 'its not your calendar'));
+        const user_role = await calendar_user.getUserRole(req.senderData.id, calendar_id);
+        if (user_role !== null && user_role !== 'editor') {
+        console.log(user_role);
+            return res.json(new Response(false, "You don't have enough permissions"));
+        }
+
+        let result;
+        if (category === "arrangement" || category === "task" || isNotification || category === 'reminder') {
+            result = await events.create(title, startAt, endAt, category, description, calendar_id, req.senderData.id, place);
+            res.json(new Response(true, 'Event created', result));
+            if (isNotification || category === 'reminder') {
+                await notification.add(req.senderData.email, result);
+            }
+            if (await events.getCalendarType(calendar_id) === 'shared' && category === "arrangement" || category === "task") {
+                await chat.creat(title, result);
+            }
+        } else {
+            res.json(new Response(false, 'Invalid category'));
         }
     } catch (error) {
         console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
+
 
 async function editEvents(req,res) {
     let events = new Events();
