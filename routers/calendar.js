@@ -7,7 +7,7 @@ router.post('/create',token_controller.verifyToken,calendar.createCalendar);
 router.delete('/delete',calendar.deleteCalendar);
 router.patch('/update',calendar.updateCalendar);
 router.get('/all', token_controller.verifyToken, calendar.getAllCalendars);
-router.get('/:id',calendar.getCalendarById);
+router.get('/:id',token_controller.verifyToken, calendar.getCalendarById);
 router.get('users/:calendar_id',calendar.getUserByCalendarId);
 router.post("/invite", token_controller.verifyToken, calendar.addUserToCalendarByEmail);
 router.post('/accept-invitation/:token',calendar.getAcceptionCalendar);

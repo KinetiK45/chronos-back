@@ -25,7 +25,7 @@ async function register(req, res) {
                     res.json(new Response(true, 'Регистрация успешна'));
                 })
             let calendar = new Calendar();
-            calendar.create("Default", result,'Default calendar','#a2a2a2');
+            calendar.create("Default", result,'Default calendar','#a2a2a2','default');
         }).catch((error)=>{
         console.log(error);
         res.json(new Response(false, error.toString()));
