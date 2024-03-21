@@ -8,7 +8,7 @@ router.post('/set_notification', token_controller.verifyToken, eventController.s
 router.get('/byCalendarPeriod/:calendar_id', token_controller.verifyToken, eventController.getAllByMonth);
 router.post("/invite", token_controller.verifyToken, eventController.addUserToEventsByEmail);
 router.post('/accept-invitation/:token', eventController.getAcceptionEvent);
-router.patch('/edit', eventController.editEvents);
+router.patch('/edit',token_controller.verifyToken, eventController.editEvents);
 router.delete('/:id/delete', eventController.deleteEvents);
 
 module.exports = router

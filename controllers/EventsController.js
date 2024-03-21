@@ -127,9 +127,14 @@ async function createEvents(req, res) {
 
 async function editEvents(req,res) {
     let events = new Events();
-    const {id, title, startAt, endAt, category, description, place, complete} = req.body;
+    let calendar_user = new Calendar_User();
+    const {id, title, startAt, endAt, category, description, place, complete,calendar_id} = req.body;
     if (!id){
         return res.json(new Response(false, 'No id provided'));
+    }
+    const user_role = await calendar_user.getUserRole(req.senderData.id, calendar_id);
+    if (user_role !== null && user_role !== 'editor') {
+        return res.json(new Response(false, "You don't have enough permissions"));
     }
     try {
         events.find({id: id}).then((result) => {

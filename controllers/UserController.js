@@ -51,11 +51,12 @@ async function userAvatar(req, res) {
     });
 }
 
+// cdelat chtobi ne vivodilo usera kotorii ichet
 async function findByFullName(req,res) {
     try {
         let user = new User();
         const { stringValue } = req.params
-        const result = await user.findByFullName(stringValue);
+        const result = await user.findByFullName(req.senderData.id,stringValue);
         if(result !== null) {
             res.json(new Response(true," all user what found by " + stringValue, result));
         } else {
