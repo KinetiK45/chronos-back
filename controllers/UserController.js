@@ -47,7 +47,22 @@ async function userAvatar(req, res) {
     });
 }
 
+//сделать поиск user по full name  regex от 3 букв, ingnoreToLowerAndUpperCase return full id?
+async function findByFullName(req,res) {
+    try {
+        let user = new User();
+        const { stringValue } = req.params
+        const result = await user.findByFullName(stringValue);
+        if(result !== null) {
+            res.json(new Response(true," all user what found by " + stringValue, result));
+        } else {
+            res.json(new Response(true,"not found any user by stringValue " + stringValue));
+        }
+    } catch (error) {
+        res.json(new Response(false,error.toString()));
+    }
 
+}
 async function avatarUpload(req, res) {
     if (!req.file) {
         return res.json(new Response(false, 'Ошибка загрузки файла!'));
@@ -89,5 +104,6 @@ module.exports = {
     getAllUser,
     getById,
     avatarUpload,
-    userAvatar
+    userAvatar,
+    findByFullName
 }

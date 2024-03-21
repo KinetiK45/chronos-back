@@ -40,22 +40,17 @@ class User extends Model {
         }
     }
 
-
-
-
-
     async findByFullName(stringValue) {
         const tableName = 'users';
         const selectColumns = ['e.id', 'e.email', 'e.full_name'];
 
-        const escapedStringValue = pool.escape(stringValue.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&")); // экранирование специальных символов
-        const regex = `\\b${escapedStringValue}\\b`;
+        const escapedStringValue = pool.escape('%' + stringValue + '%');
 
         const query = `
-            SELECT ${selectColumns.join(', ')}
-            FROM ${tableName} e
-            WHERE LOWER(full_name) REGEXP '${regex}'
-        `;
+        SELECT ${selectColumns.join(', ')}
+        FROM ${tableName} e
+        WHERE LOWER(full_name) LIKE ${escapedStringValue}
+    `;
 
         try {
             console.log(query);
@@ -63,8 +58,10 @@ class User extends Model {
             console.log(rows);
             return rows;
         } catch (error) {
+            console.log(error);
             throw error;
         }
     }
 }
+
 module.exports = User;
