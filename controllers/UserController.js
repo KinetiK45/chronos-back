@@ -23,10 +23,11 @@ async function getById(req,res){
         let user = new User();
         const { id } = req.params;
         const userById = await user.find({ id: id });
+        const filteredUser = userById.map(({ id, full_name }) => ({ id, full_name }));
         if (userById.length === 0){
             return res.json(new Response(false, "not found"));
         }
-        res.json(new Response(true, "users by id", userById));
+        res.json(new Response(true, "users by id", filteredUser));
     } catch (error) {
         console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));
@@ -51,7 +52,6 @@ async function userAvatar(req, res) {
     });
 }
 
-// cdelat chtobi ne vivodilo usera kotorii ichet
 async function findByFullName(req,res) {
     try {
         let user = new User();

@@ -263,12 +263,13 @@ async function addUserToEventsByEmail(req,res){
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
+                        res.json(false,"Can't send invitation" + error.message)
                         console.error(error);
                     } else {
+                        res.json(new Response(true, "Send invitation"));
                         console.log('Email sent: ', info);
                     }
                 });
-                res.json(new Response(true, "Send invitation", {invitationCode}));
             }else {
                 res.json(new Response(false, "Not found event"));
 

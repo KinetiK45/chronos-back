@@ -140,12 +140,13 @@ async function addUserToCalendarByEmail(req, res) {
             };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
+                    res.json(false,"Can't send invitation" + error.message)
                     console.error(error);
                 } else {
+                    res.json(new Response(true, "Send invitation"));
                     console.log('Email sent: ', info);
                 }
             });
-            res.json(new Response(true, "Send invitation", {invitationCode}));
         }
     });
 }
@@ -178,13 +179,13 @@ async function getAcceptionCalendar(req,res){
             });
         });
         let events = new Event();
-        let events_users = new Events_Users();
+        // let events_users = new Events_Users();
         const events_by_calendar_id = await events.getUpcomingEvents(decodedToken.calendar_id);
         console.log("upcoming event" + {events_by_calendar_id});
         if (Array.isArray(events_by_calendar_id)){
             for (const event of events_by_calendar_id ) {
                 await chat.creat(event.title,event.id);
-                await events_users.create(decodedToken.user_id,event.id);
+                // await events_users.create(decodedToken.user_id,event.id);
             }
         }
     } catch (error) {
