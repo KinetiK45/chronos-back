@@ -4,8 +4,8 @@ const calendar = require("../controllers/CalendarController")
 const token_controller = require('../controllers/TokenController');
 
 router.post('/create',token_controller.verifyToken,calendar.createCalendar);
-router.delete('/delete',calendar.deleteCalendar);
-router.patch('/update',calendar.updateCalendar);
+router.delete('/delete', token_controller.verifyToken, calendar.deleteCalendar);
+router.patch('/update', token_controller.verifyToken, calendar.updateCalendar);
 router.get('/all', token_controller.verifyToken, calendar.getAllCalendars);
 router.get('/:id',token_controller.verifyToken, calendar.getCalendarById);
 router.get('users/:calendar_id',calendar.getUserByCalendarId);

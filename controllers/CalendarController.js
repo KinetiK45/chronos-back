@@ -77,8 +77,8 @@ async function updateCalendar(req,res){
         let calendar = new Calendar();
         let shared_calendar = new Calendar_User();
         const {calendar_id , title,description, color} = req.body;
-        if(await calendar.getTable(calendar_id,req.senderData.id) === true) {
-            const result = calendar.find({id: calendar_id});
+        if(await calendar.getTable(calendar_id, req.senderData.id) === true) {
+            const result = await calendar.find({id: calendar_id});
             if (result[0].id === await calendar.getDefaultCalendar(req.senderData.id)) {
                 res.json(new Response(false, "You cannot change default calendar"));
             } else {
