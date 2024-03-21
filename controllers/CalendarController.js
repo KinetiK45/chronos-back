@@ -91,7 +91,7 @@ async function updateCalendar(req,res){
                 res.json(new Response(true, 'Calendar successfully update'));
             }
         }else {
-            const result = shared_calendar.find({user_id: req.senderData.id, calendar_id: calendar_id})
+            const result = await shared_calendar.find({user_id: req.senderData.id, calendar_id: calendar_id})
             await shared_calendar.updateById({
                 id: result[0].id,
                 custom_color: color,
