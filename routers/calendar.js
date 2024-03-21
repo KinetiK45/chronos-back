@@ -9,7 +9,7 @@ router.patch('/update', token_controller.verifyToken, calendar.updateCalendar);
 router.get('/all', token_controller.verifyToken, calendar.getAllCalendars);
 router.get('/:id',token_controller.verifyToken, calendar.getCalendarById);
 router.patch('/update/role',token_controller.verifyToken,calendar.updateRole);
-router.get('/users/:calendar_id',calendar.getUserByCalendarId);
+router.get('/users/:calendar_id',token_controller.verifyToken ,calendar.getUserByCalendarId);
 router.post("/invite", token_controller.verifyToken, calendar.addUserToCalendarByEmail);
 router.post('/accept-invitation/:token',calendar.getAcceptionCalendar);
 

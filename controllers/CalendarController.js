@@ -109,6 +109,10 @@ async function updateCalendar(req,res){
 async function getUserByCalendarId(req,res){
     let {calendar_id } = req.params;
     let user = new User();
+    let calendar_user = new Calendar_User();
+    if (!(await calendar_user.hasCalendars(req.senderData.id, calendar_id))) {
+        return res.json(new Response(false, "It's not your calendar"));
+    }
     const result = await user.getUserByCalendarId(calendar_id);
     if(result != null) {
         res.json(new Response(true, "users", result));
