@@ -216,7 +216,7 @@ async function deleteUser(req,res){
     if (await calendars.getTable(calendar_id, req.senderData.id) === true) {
         let calendars_users = new Calendar_User();
         calendars_users.find({calendar_id: calendar_id, user_id: user_id}).then((result) => {
-           calendars_users.delete({id: result});
+           calendars_users.delete({id: result[0].id});
         });
         res.json(new Response(true, "yvolin naxui"));
     } else {
