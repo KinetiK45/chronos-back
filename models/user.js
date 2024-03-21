@@ -16,20 +16,50 @@ class User extends Model {
     }
 
     async getUserByCalendarId(calendar_id) {
-        const tableName = 'calendars';
-
-        const selectColumns = ['e.id', 'e.title', 'e.user_id', 'e.description','e.type'];
+        const selectColumns = ['eu.user_id AS user_id'];
+        const fromClause = 'calendar_users eu';
+        const whereClause = 'eu.calendar_id = ?';
 
         const query = `
-        SELECT ${selectColumns.join(',')} 
-        FROM ${tableName} e
-        LEFT JOIN calendar_users eu ON e.user_id = eu.user_id
-        WHERE eu.id = ? OR e.calendar_id = ?
-        LIMIT 10;
+        SELECT ${selectColumns.join(', ')} 
+        FROM ${fromClause}
+        WHERE ${whereClause}
+        UNION ALL
+        SELECT e.user_id
+        FROM calendars e
+        WHERE e.id = ?
     `;
+
         try {
             console.log(query);
             const [rows] = await pool.execute(query, [calendar_id, calendar_id]);
+            console.log(rows);
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
+
+
+
+    async findByFullName(stringValue) {
+        const tableName = 'users';
+        const selectColumns = ['e.id', 'e.email', 'e.full_name'];
+
+        const escapedStringValue = pool.escape(stringValue.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&")); // экранирование специальных символов
+        const regex = `\\b${escapedStringValue}\\b`;
+
+        const query = `
+            SELECT ${selectColumns.join(', ')}
+            FROM ${tableName} e
+            WHERE LOWER(full_name) REGEXP '${regex}'
+        `;
+
+        try {
+            console.log(query);
+            const [rows] = await pool.execute(query);
             console.log(rows);
             return rows;
         } catch (error) {

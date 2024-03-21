@@ -107,7 +107,7 @@ async function updateCalendar(req,res){
 }
 
 async function getUserByCalendarId(req,res){
-    let {calendar_id } = req.params.calendar_id;
+    let {calendar_id } = req.params;
     let user = new User();
     const result = await user.getUserByCalendarId(calendar_id);
     if(result != null) {
@@ -223,5 +223,6 @@ module.exports = {
     getCalendarById,
     getUserByCalendarId,
     addUserToCalendarByEmail,
-    getAcceptionCalendar
+    getAcceptionCalendar,
+    updateRole
 }
