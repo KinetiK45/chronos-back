@@ -7,8 +7,12 @@ async function getAllUser(req, res){
     try {
         let user = new User();
         const {page,limit} = req.query;
-        const allUser = user.find_with_sort({page: page, size: limit});
-        res.json(new Response(true, "All users by page" + page, allUser));
+        if(page >= 1 ) {
+            const allUser = await user.find_with_sort({page: page, size: limit});
+            res.json(new Response(true, "All users by page" + page, allUser));
+        }else {
+            res.json(new Response(false,"incorrect page, page must be more or equals than 1, but your page " + page));
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));
@@ -47,7 +51,6 @@ async function userAvatar(req, res) {
     });
 }
 
-//сделать поиск user по full name  regex от 3 букв, ingnoreToLowerAndUpperCase return full id?
 async function findByFullName(req,res) {
     try {
         let user = new User();

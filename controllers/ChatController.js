@@ -5,7 +5,7 @@ async function AddMessage(req ,res){
     try {
         let message = new Messages();
         const { chat_id, content, reply_to} = req.body;
-        await message.create(chat_id, content, req.senderData.id, reply_to).then((result) => {
+        message.create(chat_id, content, req.senderData.id, reply_to).then((result) => {
             message.find({id: result}).then(() => {
                 res.json(new Response(true, 'Message successfully add'));
             }).catch((error) => {
@@ -23,7 +23,7 @@ async function EditMessage (req,res) {
     try {
         let message = new Messages();
         const {id, content} = req.body;
-        const result  = message.find({id: id});
+        const result  = await message.find({id: id});
         if (result[0].sender_id !== req.senderData.id) {
             res.json(new Response(false, "You cannot change message other user"));
         }else {
@@ -44,7 +44,7 @@ async function DeleteMessage(req,res) {
     try {
         let message = new Messages();
         const {id} = req.body;
-        const result  = message.find({id: id});
+        const result  = await message.find({id: id});
         if (result[0].sender_id !== req.senderData.id) {
             res.json(new Response(false, "You cannot change message other user"));
         }else {
