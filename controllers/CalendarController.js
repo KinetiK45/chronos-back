@@ -136,7 +136,7 @@ async function addUserToCalendarByEmail(req, res) {
             const mailOptions = {
                 to: result[0].email,
                 subject: 'Invite',
-                text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: http://localhost:3001/api/calendar/accept-invitation/${invitationCode}`
+                text: `${req.senderData.full_name} invites you to join his calendar ${title}. Click the link to accept: ${req.headers.origin}/accept-invitation/${invitationCode}`
             };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
@@ -193,20 +193,34 @@ async function getAcceptionCalendar(req,res){
     }
 }
 
-async function updateRole(res,req){
+async function updateRole(req,res) {
     let calendars = new Calendar();
-    const {calendar_id,user_id,role} = req.body;
-    if(await calendars.getTable(calendar_id,req.senderData.id) === true) {
+    const {calendar_id, user_id, role} = req.body;
+    if (await calendars.getTable(calendar_id, req.senderData.id) === true) {
         let calendars_users = new Calendar_User();
-        calendars_users.find({calendar_id: calendar_id, user_id:user_id }).then((result) =>{
+        calendars_users.find({calendar_id: calendar_id, user_id: user_id}).then((result) => {
             calendars_users.updateById({
                 id: result[0].id,
                 role: role
             });
         });
-        res.json(new Response(true,"obnovil naxui"));
+        res.json(new Response(true, "obnovil naxui"));
     } else {
-        res.json(new Response(false,"poshol naxyi ne xhataet prav "));
+        res.json(new Response(false, "poshol naxyi ne xhataet prav "));
+    }
+}
+
+async function deleteUser(req,res){
+    let calendars = new Calendar();
+    const {calendar_id, user_id} = req.body;
+    if (await calendars.getTable(calendar_id, req.senderData.id) === true) {
+        let calendars_users = new Calendar_User();
+        calendars_users.find({calendar_id: calendar_id, user_id: user_id}).then((result) => {
+           calendars_users.delete({id: result});
+        });
+        res.json(new Response(true, "yvolin naxui"));
+    } else {
+        res.json(new Response(false, "poshol naxyi ne xhataet prav "));
     }
 }
 
@@ -228,5 +242,6 @@ module.exports = {
     getUserByCalendarId,
     addUserToCalendarByEmail,
     getAcceptionCalendar,
-    updateRole
+    updateRole,
+    deleteUser
 }

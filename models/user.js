@@ -53,6 +53,7 @@ class User extends Model {
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         WHERE LOWER(full_name) LIKE ${escapedStringValue}
+        LIMIT 5
     `;
 
         try {

@@ -254,7 +254,7 @@ async function addUserToEventsByEmail(req,res){
                 const mailOptions = {
                     to: result[0].email,
                     subject: 'Invite',
-                    text: `${req.senderData.full_name} invites you to join his event ${title}. Click the link to accept: http://localhost:3001/api/events/accept-invitation/${invitationCode}`
+                    text: `${req.senderData.full_name} invites you to join his event ${title}. Click the link to accept:  ${req.headers.origin}/accept-invitation/${invitationCode}`
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
