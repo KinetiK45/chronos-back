@@ -22,19 +22,17 @@ class User extends Model {
         const whereClause = 'cu.calendar_id = ?';
 
         const query = `
-    SELECT ${selectColumns.join(', ')} 
-    FROM ${fromClause}
-    ${joinClause}
-    WHERE ${whereClause}
-    UNION ALL
-    SELECT 
-        u.id AS user_id,
-        u.full_name,
-        'owner' AS role
-    FROM calendars c
-    JOIN  users u ON c.user_id = u.id
-    WHERE c.id = ?
-    `;
+            SELECT ${selectColumns.join(', ')}
+            FROM ${fromClause} ${joinClause}
+            WHERE ${whereClause}
+            UNION ALL
+            SELECT u.id    AS user_id,
+                   u.full_name,
+                   'owner' AS role
+            FROM calendars c
+                     JOIN users u ON c.user_id = u.id
+            WHERE c.id = ?
+        `;
         try {
             console.log(query);
             const [rows] = await pool.execute(query, [calendar_id, calendar_id]);
