@@ -105,7 +105,6 @@ async function createEvents(req, res) {
         console.log(user_role);
             return res.json(new Response(false, "You don't have enough permissions"));
         }
-
         let result;
         if (category === "arrangement" || category === "task" || isNotification || category === 'reminder') {
             result = await events.create(title, startAt, endAt, category, description, calendar_id, req.senderData.id, place);
