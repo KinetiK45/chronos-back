@@ -43,9 +43,11 @@ class User extends Model {
         }
     }
 
-    async findByFullName(user_id, stringValue) {
+    async findByFullName(user_ids, stringValue) {
         const tableName = 'users';
         const selectColumns = ['e.id', 'e.email', 'e.full_name'];
+
+        const idPlaceholders = user_ids.map(() => '?').join(',');
 
         const escapedStringValue = pool.escape('%' + stringValue + '%');
 
@@ -53,13 +55,13 @@ class User extends Model {
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         WHERE LOWER(full_name) LIKE ${escapedStringValue}
-        AND e.id != ${user_id}  
+        AND e.id NOT IN (${idPlaceholders})  
         LIMIT 5
     `;
 
         try {
             console.log(query);
-            const [rows] = await pool.execute(query);
+            const [rows] = await pool.execute(query, [...user_ids]);
             console.log(rows);
             return rows;
         } catch (error) {
@@ -67,6 +69,7 @@ class User extends Model {
             throw error;
         }
     }
+
 
 }
 

@@ -55,17 +55,16 @@ async function userAvatar(req, res) {
 async function findByFullName(req,res) {
     try {
         let user = new User();
-        const { stringValue } = req.params
-        const result = await user.findByFullName(req.senderData.id,stringValue);
+        const { username_part , user_ids } = req.body;
+        const result = await user.findByFullName(user_ids,username_part);
         if(result !== null) {
-            res.json(new Response(true," all user what found by " + stringValue, result));
+            res.json(new Response(true," all user what found by " + username_part, result));
         } else {
-            res.json(new Response(true,"not found any user by stringValue " + stringValue));
+            res.json(new Response(true,"not found any user by stringValue " + username_part));
         }
     } catch (error) {
         res.json(new Response(false,error.toString()));
     }
-
 }
 async function avatarUpload(req, res) {
     if (!req.file) {
