@@ -23,7 +23,6 @@ function deactivateToken(req, res) {
 }
 
 function verifyToken(req, res, next) {
-    console.log('verification!');
     let token = '';
     try {
         token = req.headers.authorization.replaceAll('Bearer ', '');
@@ -48,7 +47,6 @@ function verifyToken(req, res, next) {
 
 function verifyLogin(req, res, next) {
     const token = req.params.confirm_token;
-    console.log(token);
     jwt.verify(token, secretYaEby, (err, decoded) => {
         if (err) {
             return res.json(new Response(false, 'Недействительный токен'));

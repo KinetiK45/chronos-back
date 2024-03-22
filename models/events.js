@@ -30,7 +30,6 @@ class Events extends Model{
         try {
             const [rows] = await pool.execute(query, [event_id]);
             if (rows.length > 0) {
-                console.log(rows[0].title);
                 return rows[0].title;
             } else {
                 return null;

@@ -103,7 +103,6 @@ class Calendar_users extends Model{
 
         try {
             const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
-            console.log(rows)
             return rows;
         } catch (error) {
             throw error;

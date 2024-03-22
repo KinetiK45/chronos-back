@@ -34,9 +34,7 @@ class User extends Model {
             WHERE c.id = ?
         `;
         try {
-            console.log(query);
             const [rows] = await pool.execute(query, [calendar_id, calendar_id]);
-            console.log(rows);
             return rows;
         } catch (error) {
             throw error;
@@ -60,17 +58,12 @@ class User extends Model {
     `;
 
         try {
-            console.log(query);
             const [rows] = await pool.execute(query, [...user_ids]);
-            console.log(rows);
             return rows;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
-
-
 }
 
 module.exports = User;

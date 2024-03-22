@@ -66,9 +66,7 @@ class Calendars extends Model {
         LIMIT 10;
     `;
         try {
-            console.log(query);
             const [rows] = await pool.execute(query, [user_id, user_id]);
-            console.log(rows);
             return rows;
         } catch (error) {
             throw error;

@@ -14,8 +14,6 @@ class Model {
         const placeholders = keys.map(() => '?').join(', ');
         const query = `INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders})`;
 
-        console.log(query);
-        console.log(values);
         try {
             const [result] = await pool.execute(query, values);
             return result.insertId;
@@ -74,7 +72,6 @@ class Model {
             const totalCount = countResult[0].count;
 
             const [rows] = await pool.execute(dataQuery, values);
-            console.log(dataQuery);
 
             const totalPages = Math.ceil(totalCount / size);
             const currentPage = page || 1;
@@ -119,9 +116,6 @@ class Model {
 
         const query = `UPDATE ${this.tableName} SET ${setClauses} WHERE id = ?`;
         values.push(updatedFields.id);
-
-        console.log(query);
-        console.log(values);
 
         try {
             const [result] = await pool.execute(query, values);

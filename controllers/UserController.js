@@ -14,7 +14,6 @@ async function getAllUser(req, res){
             res.json(new Response(false,"incorrect page, page must be more or equals than 1, but your page " + page));
         }
     } catch (error) {
-        console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
@@ -29,7 +28,6 @@ async function getById(req,res){
         }
         res.json(new Response(true, "users by id", filteredUser));
     } catch (error) {
-        console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }

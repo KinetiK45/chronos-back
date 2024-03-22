@@ -37,7 +37,6 @@ async function getAllByMonth(req, res) {
         const {calendar_id} = req.params;
         const {startAt, endAt} = req.query;
         let user = req.senderData.id;
-        console.log({startAt, endAt, user })
         if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
             return res.json(new Response(false, 'invalid startAt/endAt params'));
         }
@@ -56,7 +55,6 @@ async function getAllByMonth(req, res) {
             }
         }
     } catch (error) {
-        console.error(error);
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
@@ -102,7 +100,6 @@ async function createEvents(req, res) {
         }
         const user_role = await calendar_user.getUserRole(req.senderData.id, calendar_id);
         if (user_role !== null && user_role !== 'editor') {
-        console.log(user_role);
             return res.json(new Response(false, "You don't have enough permissions"));
         }
         let result;
@@ -119,7 +116,6 @@ async function createEvents(req, res) {
             res.json(new Response(false, 'Invalid category'));
         }
     } catch (error) {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -151,7 +147,6 @@ async function editEvents(req,res) {
             res.json(new Response(true, "Successfully edited"));
         });
     }catch (error) {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -174,7 +169,6 @@ async function setNotification(req,res) {
         await notification.add(req.senderData.email, event_id);
         res.json(new Response(true, 'Notification create'));
     } catch (error) {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -205,9 +199,6 @@ setInterval(async () => {
             const timeDifference = currentTime - eventDate;
             if (timeDifference > -60000 && timeDifference <= 0) {
                 sendNotification(event.user_email, event.title);
-                console.log("notification sent");
-            } else {
-                console.log("poka idesh naxyi");
             }
         });
     } catch (error) {
@@ -218,7 +209,6 @@ setInterval(async () => {
 async function getAcceptionEvent(req,res) {
     try {
         const decodedToken = verify(req.params.token, 'secret key');
-        console.log(decodedToken);
         let chat = new Chat();
         let event = new Events();
         let events_users = new Events_Users();
@@ -240,7 +230,6 @@ async function getAcceptionEvent(req,res) {
             });
         });
     } catch (error) {
-        console.error(error);
         res.json(new Response(false, error.toString()));
     }
 }

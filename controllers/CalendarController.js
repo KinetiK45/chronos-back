@@ -7,7 +7,6 @@ const {verify} = require("jsonwebtoken");
 const Chat = require("../models/chat");
 const nodemailer = require("nodemailer");
 const Event = require("../models/events");
-const Events_Users = require("../models/events_users");
 
 async function createCalendar(req,res) {
     let calendar = new Calendar();
@@ -16,7 +15,6 @@ async function createCalendar(req,res) {
     calendar.create(title, req.senderData.id, description, color).then((result) => {
         res.json(new Response(true, 'Calendar successfully create', result));
     }).catch((error) => {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     });
 }
@@ -47,11 +45,9 @@ async function getCalendarById(req,res) {
 async function getAllCalendars(req,res) {
     try {
         let calendars = new Calendar();
-        console.log(req.senderData.id);
         const allCalendars = await calendars.getCalendars(req.senderData.id);
         res.json(new Response(true, "all calendars", allCalendars));
     } catch (error) {
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -67,7 +63,6 @@ async function deleteCalendar(req,res) {
             res.json(new Response(true, 'Calendar successfully delete'));
         }
     }catch (error){
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -101,7 +96,6 @@ async function updateCalendar(req,res){
             res.json(new Response(true,'Calendar successfully update'));
         }
     }catch (error){
-        console.log(error);
         res.json(new Response(false, error.toString()));
     }
 }
@@ -141,10 +135,8 @@ async function addUserToCalendarByEmail(req, res) {
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     res.json(false,"Can't send invitation" + error.message)
-                    console.error(error);
                 } else {
                     res.json(new Response(true, "Send invitation"));
-                    console.log('Email sent: ', info);
                 }
             });
         }
