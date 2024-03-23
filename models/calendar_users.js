@@ -108,6 +108,30 @@ class Calendar_users extends Model{
             throw error;
         }
     }
+    async getCount(startAt,endAt,calendar_id) {
+        const tableName = 'events';
+
+        const whereClauses = [
+            'e.calendar_id = ?',
+            'e.startAt >= ?',
+            'e.endAt <= ?'
+        ];
+
+        const query = `
+        SELECT COUNT(*) AS count
+        FROM ${tableName} e
+        WHERE ${whereClauses.join(' AND ')}
+        LIMIT 3000;
+    `;
+        try {
+            const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
+            console.log(rows)
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getUserRole(user_id, calendar_id) {
         const tableName = 'calendar_users';
 

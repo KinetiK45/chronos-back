@@ -33,17 +33,16 @@ function convertToDateTime(dateString) {
 
 async function getAllByMonth(req, res) {
     try {
-        let events = new Calendar_User();
+        let calendarUser = new Calendar_User();
         const {calendar_id} = req.params;
         const {startAt, endAt} = req.query;
-        let user = req.senderData.id;
         if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
             return res.json(new Response(false, 'invalid startAt/endAt params'));
         }
         else {
-            const eventsMonth = await events.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
+            const eventsMonth = await calendarUser.getByPeriod(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
             for (const eventsMonthElement of eventsMonth) {
-                const color_found = await events.findColor(eventsMonthElement.calendar_id, eventsMonthElement.creator_id);
+                const color_found = await calendarUser.findColor(eventsMonthElement.calendar_id, eventsMonthElement.creator_id);
                 if (color_found)
                     eventsMonthElement.color = color_found;
             }
@@ -58,7 +57,26 @@ async function getAllByMonth(req, res) {
         res.status(500).json(new Response(false, "Internal server error"));
     }
 }
-
+async function getCount(req, res) {
+    try {
+        let calendarUser = new Calendar_User();
+        const {calendar_id} = req.params;
+        const {startAt, endAt} = req.query;
+        if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
+            return res.json(new Response(false, 'invalid startAt/endAt params'));
+        }
+        else {
+            const count = await calendarUser.getCount(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
+            if (count && count.length > 0) {
+                res.json(new Response(true, "All events start from " + startAt + " and end " + endAt, {count: count}));
+            } else {
+                res.json(new Response(true, "No events for the from " + startAt + " and end " + endAt, {}));
+            }
+        }
+    } catch (error) {
+        res.status(500).json(new Response(false, "Internal server error"));
+    }
+}
 async function getNationalHolidays(countryCode, period) {
     try {
         const year = new Date().getFullYear();
@@ -274,5 +292,6 @@ module.exports = {
     addUserToEventsByEmail,
     getAcceptionEvent,
     editEvents,
-    deleteEvents
+    deleteEvents,
+    getCount
 }

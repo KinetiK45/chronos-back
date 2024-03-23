@@ -54,13 +54,25 @@ async function getAllCalendars(req,res) {
 
 async function deleteCalendar(req,res) {
     try {
+        let calendars_users = new Calendar_User();
         let calendar = new Calendar();
         const {calendar_id} = req.body;
-        if(calendar_id === await calendar.getDefaultCalendar(req.senderData.id)) {
-            res.json(new Response(false, "You cannot delete default calendar"));
+        if (!(await calendars_users.hasCalendars(req.senderData.id, calendar_id))) {
+            return res.json(new Response(false, "It's not your calendar"));
         }else {
-            await calendar.delete({id: calendar_id });
-            res.json(new Response(true, 'Calendar successfully delete'));
+            if(!(await calendar.getTable(calendar_id,req.senderData.id))){
+                 calendars_users.find({ calendar_id: calendar_id, user_id: req.senderData.id }).then((result) => {
+                     calendars_users.delete({ id: result[0].id });
+                     res.json(new Response(true,"You successfully exit"));
+                 })
+            }else {
+                if(calendar_id === await calendar.getDefaultCalendar(req.senderData.id)) {
+                    res.json(new Response(false, "You cannot delete default calendar"));
+                }else {
+                    await calendar.delete({id: calendar_id });
+                    res.json(new Response(true, 'Calendar successfully delete'));
+                }
+            }
         }
     }catch (error){
         res.json(new Response(false, error.toString()));
