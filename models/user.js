@@ -41,11 +41,11 @@ class User extends Model {
         }
     }
 
-    async findByFullName(user_ids, stringValue) {
+    async findByFullName(user_ids_to_exclude, stringValue) {
         const tableName = 'users';
         const selectColumns = ['e.id', 'e.email', 'e.full_name'];
 
-        const idPlaceholders = user_ids.map(() => '?').join(',');
+        const idPlaceholders = user_ids_to_exclude.map(() => '?').join(',');
 
         const escapedStringValue = pool.escape('%' + stringValue + '%');
 
@@ -53,12 +53,12 @@ class User extends Model {
         SELECT ${selectColumns.join(', ')}
         FROM ${tableName} e
         WHERE LOWER(full_name) LIKE ${escapedStringValue}
-        AND e.id NOT IN (${idPlaceholders})  
+        AND e.id NOT IN (${idPlaceholders})
         LIMIT 5
     `;
 
         try {
-            const [rows] = await pool.execute(query, [...user_ids]);
+            const [rows] = await pool.execute(query, [...user_ids_to_exclude]);
             return rows;
         } catch (error) {
             throw error;

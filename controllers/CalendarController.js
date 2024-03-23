@@ -11,7 +11,6 @@ const Event = require("../models/events");
 async function createCalendar(req,res) {
     let calendar = new Calendar();
     const {title, description, color} = req.body;
-
     calendar.create(title, req.senderData.id, description, color).then((result) => {
         res.json(new Response(true, 'Calendar successfully create', result));
     }).catch((error) => {
@@ -157,6 +156,7 @@ async function addUserToCalendarByEmail(req, res) {
 
 async function getAcceptionCalendar(req,res){
     try {
+        console.log(JSON.stringify(req.params.token));
         const decodedToken = verify(req.params.token, 'secret key');
         console.log(decodedToken);
         let chat = new Chat();
