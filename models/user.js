@@ -16,23 +16,19 @@ class User extends Model {
     }
 
     async getUserByCalendarId(calendar_id) {
-        const selectColumns = ['u.id AS user_id', 'u.full_name', 'cu.role'];
-        const fromClause = 'calendar_users cu';
-        const joinClause = 'LEFT JOIN users u ON cu.user_id = u.id';
-        const whereClause = 'cu.calendar_id = ?';
-
         const query = `
-            SELECT ${selectColumns.join(', ')}
-            FROM ${fromClause} ${joinClause}
-            WHERE ${whereClause}
-            UNION ALL
-            SELECT u.id    AS user_id,
-                   u.full_name,
-                   'owner' AS role
-            FROM calendars c
-                     JOIN users u ON c.user_id = u.id
-            WHERE c.id = ?
-        `;
+        SELECT u.id AS user_id, u.full_name, cu.role, cu.custom_color AS color
+        FROM calendar_users cu LEFT JOIN users u ON cu.user_id = u.id
+        WHERE cu.calendar_id = ?
+        UNION ALL
+        SELECT u.id AS user_id,
+               u.full_name,
+               'owner' AS role,
+               c.color AS color 
+        FROM calendars c
+                 JOIN users u ON c.user_id = u.id
+        WHERE c.id = ?
+    `;
         try {
             const [rows] = await pool.execute(query, [calendar_id, calendar_id]);
             return rows;
@@ -40,6 +36,7 @@ class User extends Model {
             throw error;
         }
     }
+
 
     async findByFullName(user_ids, stringValue) {
         const tableName = 'users';

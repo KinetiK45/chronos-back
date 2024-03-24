@@ -7,6 +7,7 @@ const {verify} = require("jsonwebtoken");
 const Chat = require("../models/chat");
 const nodemailer = require("nodemailer");
 const Event = require("../models/events");
+const constants = require("constants");
 
 async function createCalendar(req,res) {
     let calendar = new Calendar();
@@ -56,20 +57,43 @@ async function deleteCalendar(req,res) {
     try {
         let calendars_users = new Calendar_User();
         let calendar = new Calendar();
+        let event = new Event();
         const {calendar_id} = req.body;
         if (!(await calendars_users.hasCalendars(req.senderData.id, calendar_id))) {
             return res.json(new Response(false, "It's not your calendar"));
         }else {
             if(!(await calendar.getTable(calendar_id,req.senderData.id))){
                  calendars_users.find({ calendar_id: calendar_id, user_id: req.senderData.id }).then((result) => {
-                     calendars_users.delete({ id: result[0].id });
+                     event.find({calendar_id: calendar_id , creator_id: req.senderData.id}).then((results) => {
+                         for (const resultElement of results) {
+                             if (resultElement.id !== null) {
+                                 event.delete({id: resultElement.id});
+                             }
+                         }
+                     });
+                     if (result[0].id !== null) {
+                         calendars_users.delete({ id: result[0].id });
+                     }
                      res.json(new Response(true,"You successfully exit"));
                  })
             }else {
                 if(calendar_id === await calendar.getDefaultCalendar(req.senderData.id)) {
                     res.json(new Response(false, "You cannot delete default calendar"));
-                }else {
-                    await calendar.delete({id: calendar_id });
+                }
+                else {
+                    calendars_users.find({ calendar_id: calendar_id}).then((result) => {
+                        if (result[0].id !== null) {
+                            calendars_users.delete({ id: result[0].id });
+                        }
+                        event.find({calendar_id: calendar_id}).then((results) => {
+                            for (const resultElement of results) {
+                                if (resultElement.id !== null) {
+                                    event.delete({id: resultElement.id});
+                                }
+                            }
+                        })
+                        calendar.delete({id: calendar_id });
+                    })
                     res.json(new Response(true, 'Calendar successfully delete'));
                 }
             }
@@ -215,17 +239,35 @@ async function updateRole(req,res) {
     }
 }
 
-async function deleteUser(req,res){
-    let calendars = new Calendar();
-    const {calendar_id, user_id} = req.body;
-    if (await calendars.getTable(calendar_id, req.senderData.id) === true) {
-        let calendars_users = new Calendar_User();
-        calendars_users.find({calendar_id: calendar_id, user_id: user_id}).then((result) => {
-           calendars_users.delete({id: result[0].id});
-        });
-        res.json(new Response(true, "yvolin naxui"));
-    } else {
-        res.json(new Response(false, "poshol naxyi ne xhataet prav "));
+// async function deleteUser(req,res){
+//     let calendars = new Calendar();
+//     const {calendar_id, user_id} = req.body;
+//     if (await calendars.getTable(calendar_id, req.senderData.id) === true) {
+//         let calendars_users = new Calendar_User();
+//         calendars_users.find({calendar_id: calendar_id, user_id: user_id}).then((result) => {
+//            calendars_users.delete({id: result[0].id});
+//         });
+//         res.json(new Response(true, "yvolin naxui"));
+//     } else {
+//         res.json(new Response(false, "poshol naxyi ne xhataet prav "));
+//     }
+// }
+
+async function posholNaxyi(req,res) {
+    const {calendar_id, user_id} = req.body
+    let calendars_users = new Calendar_User();
+    let calendar = new Calendar();
+    if (!(await calendars_users.hasCalendars(req.senderData.id, calendar_id))) {
+        return res.json(new Response(false, "It's not your calendar"));
+    }else {
+        if(await calendar.getTable(calendar_id,req.senderData.id) === true){
+            calendars_users.find({ calendar_id: calendar_id, user_id: user_id }).then((result) => {
+                calendars_users.delete({ id: result[0].id });
+                res.json(new Response(true,"v strahe ot syda naxyi"));
+            });
+        }else {
+            res.json(new Response(false,"poshel naxyi ne sozdatel"));
+        }
     }
 }
 
@@ -248,5 +290,6 @@ module.exports = {
     addUserToCalendarByEmail,
     getAcceptionCalendar,
     updateRole,
-    deleteUser
+    // deleteUser,
+    posholNaxyi
 }
