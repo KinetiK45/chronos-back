@@ -73,7 +73,7 @@ async function deleteCalendar(req,res) {
                      if (result[0].id !== null) {
                          calendars_users.delete({ id: result[0].id });
                      }
-                     res.json(new Response(true,"You successfully exit"));
+                     res.json(new Response(true,"You successfully leave"));
                  })
             }else {
                 if(calendar_id === await calendar.getDefaultCalendar(req.senderData.id)) {
@@ -128,6 +128,13 @@ async function updateCalendar(req,res){
                 user_id: result[0].user_id,
                 calendar_id: calendar_id,
             })
+            calendar.find({id: calendar_id}).then((resul) => {
+                calendar.updateById({
+                    id: resul[0].id,
+                    title: title,
+                    description: description
+                });
+            });
             res.json(new Response(true,'Calendar successfully update'));
         }
     }catch (error){
