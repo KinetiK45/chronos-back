@@ -56,7 +56,7 @@ async function deleteCalendar(req,res) {
         let calendars_users = new Calendar_User();
         let calendar = new Calendar();
         let event = new Event();
-        const {calendar_id} = req.body;
+        const {calendar_id} = req.params;
         if (!(await calendars_users.hasCalendars(req.senderData.id, calendar_id))) {
             return res.json(new Response(false, "It's not your calendar"));
         }else {
@@ -80,7 +80,7 @@ async function deleteCalendar(req,res) {
                 }
                 else {
                     calendars_users.find({ calendar_id: calendar_id}).then((result) => {
-                        if (result[0].id !== null) {
+                        if (result.length > 0) {
                             calendars_users.delete({ id: result[0].id });
                         }
                         event.find({calendar_id: calendar_id}).then((results) => {
