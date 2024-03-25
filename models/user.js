@@ -14,7 +14,7 @@ class User extends Model {
         this.is_vlaDICK = is_vlaDICK;
         return this.insert();
     }
-
+// kak mena eto zaebalo
     async getUserByCalendarId(calendar_id) {
         const query = `
         SELECT u.id AS user_id, u.full_name, cu.role, cu.custom_color AS color
