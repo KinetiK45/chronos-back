@@ -7,7 +7,6 @@ const {verify} = require("jsonwebtoken");
 const Chat = require("../models/chat");
 const nodemailer = require("nodemailer");
 const Event = require("../models/events");
-const constants = require("constants");
 // eto prosto pizdech
 async function createCalendar(req,res) {
     let calendar = new Calendar();
@@ -128,13 +127,15 @@ async function updateCalendar(req,res){
                 user_id: result[0].user_id,
                 calendar_id: calendar_id,
             })
-            calendar.find({id: calendar_id}).then((resul) => {
-                calendar.updateById({
-                    id: resul[0].id,
-                    title: title,
-                    description: description
+            if(title !== undefined || description !== undefined){
+                calendar.find({id: calendar_id}).then((resul) => {
+                    calendar.updateById({
+                        id: resul[0].id,
+                        title: title,
+                        description: description
+                    });
                 });
-            });
+            }
             res.json(new Response(true,'Calendar successfully update'));
         }
     }catch (error){
