@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://192.168.1.4:3000'],
+    origin: '*',
     credentials: true,
 }));
 
@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(router);
 app.use(express.static('images'));
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 80;
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен http://localhost:${PORT}`);
