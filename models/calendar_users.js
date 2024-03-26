@@ -86,27 +86,39 @@ class Calendar_users extends Model{
     async getByPeriod(startAt, endAt, calendar_id) {
         const tableName = 'events';
 
-        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt','e.calendar_id','e.description', 'e.category','e.place', 'e.creator_id', 'e.complete'];
+        const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt', 'e.calendar_id', 'e.description', 'e.category', 'e.place', 'e.creator_id', 'e.complete'];
 
         const whereClauses = [
             'e.calendar_id = ?',
             '((e.startAt >= ? AND e.startAt <= ?) OR (e.endAt >= ? AND e.endAt <= ?) OR (e.startAt <= ? AND e.endAt >= ?))', // Условие для учета событий, перекрывающихся с запрашиваемым периодом
         ];
 
-        const query = `
-        SELECT ${selectColumns.join(', ')}
+        const notificationQuery = `
+            SELECT CASE
+                       WHEN EXISTS (
+                           SELECT 1
+                           FROM notifications
+                           WHERE event_id = e.id
+                       ) THEN 'true'
+                       ELSE 'false'
+                       END AS notification
+        `;
+
+        const mainQuery = `
+        SELECT ${selectColumns.join(', ')}, (${notificationQuery}) AS notification
         FROM ${tableName} e
         WHERE ${whereClauses.join(' AND ')}
         LIMIT 3000;
     `;
 
         try {
-            const [rows] = await pool.execute(query, [calendar_id, startAt, endAt, startAt, endAt, startAt, endAt]);
+            const [rows] = await pool.execute(mainQuery, [calendar_id, startAt, endAt, startAt, endAt, startAt, endAt]);
             return rows;
         } catch (error) {
             throw error;
         }
     }
+
 
     async getCount(startAt, endAt, calendar_id) {
         const tableName = 'events';
