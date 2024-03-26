@@ -83,15 +83,14 @@ class Calendar_users extends Model{
         }
     }
 
-    async getByPeriod(startAt,endAt,calendar_id) {
+    async getByPeriod(startAt, endAt, calendar_id) {
         const tableName = 'events';
 
         const selectColumns = ['e.id', 'e.title', 'e.startAt', 'e.endAt','e.calendar_id','e.description', 'e.category','e.place', 'e.creator_id', 'e.complete'];
 
         const whereClauses = [
             'e.calendar_id = ?',
-            'e.startAt >= ?',
-            'e.endAt <= ?'
+            '((e.startAt >= ? AND e.startAt <= ?) OR (e.endAt >= ? AND e.endAt <= ?) OR (e.startAt <= ? AND e.endAt >= ?))', // Условие для учета событий, перекрывающихся с запрашиваемым периодом
         ];
 
         const query = `
@@ -102,31 +101,31 @@ class Calendar_users extends Model{
     `;
 
         try {
-            const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
+            const [rows] = await pool.execute(query, [calendar_id, startAt, endAt, startAt, endAt, startAt, endAt]);
             return rows;
         } catch (error) {
             throw error;
         }
     }
-    async getCount(startAt,endAt,calendar_id) {
+
+    async getCount(startAt, endAt, calendar_id) {
         const tableName = 'events';
 
-        const whereClauses = [
+        const whereClause = [
             'e.calendar_id = ?',
-            'e.startAt >= ?',
-            'e.endAt <= ?'
+            '((e.startAt >= ? AND e.startAt <= ?) OR (e.endAt >= ? AND e.endAt <= ?) OR (e.startAt <= ? AND e.endAt >= ?))', // Условие для учета событий, перекрывающихся с запрашиваемым периодом
         ];
 
         const query = `
         SELECT COUNT(*) AS count
         FROM ${tableName} e
-        WHERE ${whereClauses.join(' AND ')}
+        WHERE ${whereClause.join(' AND ')}
         LIMIT 3000;
     `;
+
         try {
-            const [rows] = await pool.execute(query,[calendar_id,startAt,endAt]);
-            console.log(rows)
-            return rows;
+            const [rows] = await pool.execute(query, [calendar_id, startAt, endAt, startAt, endAt, startAt, endAt]);
+            return rows[0].count;
         } catch (error) {
             throw error;
         }

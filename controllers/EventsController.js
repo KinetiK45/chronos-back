@@ -46,29 +46,8 @@ async function getAllByMonth(req, res) {
                 if (color_found)
                     eventsMonthElement.color = color_found;
             }
-
             if (eventsMonth && eventsMonth.length > 0) {
                 res.json(new Response(true, "All events start from " + startAt + " and end " + endAt, {events: eventsMonth}));
-            } else {
-                res.json(new Response(true, "No events for the from " + startAt + " and end " + endAt, {}));
-            }
-        }
-    } catch (error) {
-        res.status(500).json(new Response(false, "Internal server error"));
-    }
-}
-async function getCount(req, res) {
-    try {
-        let calendarUser = new Calendar_User();
-        const {calendar_id} = req.params;
-        const {startAt, endAt} = req.query;
-        if (!startAt || !endAt || ((convertToDateTime(startAt) || convertToDateTime(endAt)) === "Invalid date")){
-            return res.json(new Response(false, 'invalid startAt/endAt params'));
-        }
-        else {
-            const count = await calendarUser.getCount(convertToDateTime(startAt), convertToDateTime(endAt), calendar_id);
-            if (count && count.length > 0) {
-                res.json(new Response(true, "All events start from " + startAt + " and end " + endAt, {count: count}));
             } else {
                 res.json(new Response(true, "No events for the from " + startAt + " and end " + endAt, {}));
             }
@@ -293,5 +272,4 @@ module.exports = {
     getAcceptionEvent,
     editEvents,
     deleteEvents,
-    getCount
 }
