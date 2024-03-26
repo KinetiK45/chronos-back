@@ -102,13 +102,13 @@ async function createEvents(req, res) {
         let result;
         if (category === "arrangement" || category === "task" || isNotification || category === 'reminder') {
             result = await events.create(title, startAt, endAt, category, description, calendar_id, req.senderData.id, place);
-            res.json(new Response(true, 'Event created', result));
             if (isNotification || category === 'reminder') {
                 await notification.add(req.senderData.email, result);
             }
             if (await events.getCalendarType(calendar_id) === 'shared' && category === "arrangement" || category === "task") {
                 await chat.creat(title, result);
             }
+            res.json(new Response(true, 'Event created', result));
         } else {
             res.json(new Response(false, 'Invalid category'));
         }
@@ -121,7 +121,8 @@ async function createEvents(req, res) {
 async function editEvents(req,res) {
     let events = new Events();
     let calendar_user = new Calendar_User();
-    const {id, title, startAt, endAt, category, description, place, complete,calendar_id} = req.body;
+    let notif = new Notification();
+    const {id, title, startAt, endAt, category, description, place, complete,calendar_id,notification} = req.body;
     if (!id){
         return res.json(new Response(false, 'No id provided'));
     }
@@ -141,6 +142,9 @@ async function editEvents(req,res) {
                 place: place,
                 complete: complete
             });
+            if(notification === true) {
+                notif.add(req.senderData.email, result[0].id);
+            }
             res.json(new Response(true, "Successfully edited"));
         });
     }catch (error) {
