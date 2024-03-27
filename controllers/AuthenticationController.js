@@ -62,12 +62,13 @@ async function password_reset(req, res) {
     if (find_results.length === 0)
         return ERRORS.NOT_FOUND_ERROR(res, 'User');
 
-    const token = token_controller.generateToken({login: find_results[0].login}, '10m');
+    const token = token_controller.generateToken({username: find_results[0].username}, '10m');
+
     const link = `${req.headers.origin}/password-reset/${token}`;
     const mailOptions = {
         to: find_results[0].email,
         subject: 'Password reset',
-        html: `<p>Dear user.</p>
+        html: `<p>Dear ${find_results[0].full_name}.</p>
 <p>Your password recovery <a style="font-weight: bold" href="${link}">link</a></p>
 <p style="color: red">You have 10 minutes to use it!</p>
 <p>If you didn't do this, please ignore this message.</p>`
@@ -84,9 +85,9 @@ async function password_reset(req, res) {
 
 async function password_reset_confirmation(req, res) {
     try {
-        const login = req.senderData.login;
+        const username = req.senderData.username;
         let user = new User();
-        const results = await user.find({login: login});
+        const results = await user.find({username: username});
         if (results.length === 0)
             return ERRORS.NOT_FOUND_ERROR(res, 'user');
 

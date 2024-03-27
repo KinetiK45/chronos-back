@@ -99,8 +99,8 @@ class Calendar_users extends Model{
                            SELECT 1
                            FROM notifications
                            WHERE event_id = e.id
-                       ) THEN 'true'
-                       ELSE 'false'
+                       ) THEN 1
+                       ELSE 0
                        END AS notification
         `;
 
@@ -113,6 +113,7 @@ class Calendar_users extends Model{
 
         try {
             const [rows] = await pool.execute(mainQuery, [calendar_id, startAt, endAt, startAt, endAt, startAt, endAt]);
+            rows.forEach((r_e) => r_e.notification = Boolean(r_e.notification));
             return rows;
         } catch (error) {
             throw error;

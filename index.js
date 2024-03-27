@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(router);
 app.use(express.static('images'));
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен http://localhost:${PORT}`);
