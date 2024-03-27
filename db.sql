@@ -20,8 +20,6 @@ create table if not exists users
     photo               varchar(256) not null default 'default.png',
     email               varchar(256) not null unique,
     full_name           varchar(60)  not null,
-    race                varchar(60)  default 'istribitel mig-28 v sovershenstve',
-    is_vlaDICK          boolean      default true
 );
 
 create table if not exists calendars
