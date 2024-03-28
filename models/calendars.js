@@ -6,7 +6,7 @@ class Calendars extends Model {
         super("calendars");
     }
 
-    create(title,user_id,description= null, color = '#FFFFFF', type = 'own'){
+    create(title, user_id, description= null, color = '#FFFFFF', type = 'own'){
         this.title = title;
         this.user_id = user_id;
         this.description = description;

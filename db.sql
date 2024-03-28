@@ -19,7 +19,7 @@ create table if not exists users
     password            varchar(30)  not null,
     photo               varchar(256) not null default 'default.png',
     email               varchar(256) not null unique,
-    full_name           varchar(60)  not null,
+    full_name           varchar(60)  not null
 );
 
 create table if not exists calendars

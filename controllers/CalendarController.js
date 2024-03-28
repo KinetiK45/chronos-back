@@ -7,7 +7,7 @@ const {verify} = require("jsonwebtoken");
 const Chat = require("../models/chat");
 const nodemailer = require("nodemailer");
 const Event = require("../models/events");
-// eto prosto pizdech
+
 async function createCalendar(req,res) {
     let calendar = new Calendar();
     const {title, description, color} = req.body;

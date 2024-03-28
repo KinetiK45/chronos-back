@@ -17,8 +17,8 @@ const transporter = nodemailer.createTransport({
 
 async function register(req, res) {
     let user = new User();
-    const {username,password,email,full_name,race,is_vlaDICK} = req.body;
-    user.registration(username, password, email,full_name,race,is_vlaDICK,)
+    const {username, password, email, full_name} = req.body;
+    user.registration(username, password, email, full_name)
         .then((result)=>{
             user.find({id: result})
                 .then(()=>{
@@ -43,7 +43,6 @@ async function login(req, res) {
             const token = token_controller.generateToken(usersFound[0]);
             res.json(new Response(true, 'Успешный вход', {
                 user_id: usersFound[0].id,
-                role: usersFound[0].role,
                 auth_key: token
             }));
         }

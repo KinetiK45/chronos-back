@@ -5,16 +5,14 @@ class User extends Model {
     constructor() {
         super("users");
     }
-    registration(username, password, email, full_name,race = "istribitel mig-28 v sovershenstve", is_vlaDICK = true){
+    registration(username, password, email, full_name){
         this.username = username;
         this.password = password;
         this.email = email;
         this.full_name = full_name;
-        this.race = race;
-        this.is_vlaDICK = is_vlaDICK;
         return this.insert();
     }
-// kak mena eto zaebalo
+
     async getUserByCalendarId(calendar_id) {
         const query = `
         SELECT u.id AS user_id, u.full_name, cu.role, cu.custom_color AS color
